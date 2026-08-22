@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import masterRouter from './routes/index.js';
+import errorHandlerMiddleware from './middlewares/errorHandlerMiddleware.js';
 
 const app = express();
 
@@ -34,6 +36,9 @@ app.get('/api/v1/health', (req, res) => {
   });
 });
 
+// Master API Routes
+app.use('/api/v1', masterRouter);
+
 // Fallback 404 Route
 app.use('*', (req, res) => {
   res.status(404).json({
@@ -42,5 +47,8 @@ app.use('*', (req, res) => {
     message: `API Route not found: ${req.originalUrl}`,
   });
 });
+
+// Central Global Error Handler
+app.use(errorHandlerMiddleware);
 
 export default app;
