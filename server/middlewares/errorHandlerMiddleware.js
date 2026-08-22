@@ -1,4 +1,5 @@
 import ApiError from '../utils/ApiError.js';
+import { ENV } from '../config/env.js';
 
 const errorHandlerMiddleware = (err, req, res, next) => {
   let error = err;
@@ -12,22 +13,25 @@ const errorHandlerMiddleware = (err, req, res, next) => {
 
   // Handle Mongoose Bad ObjectId (CastError)
   if (err.name === 'CastError') {
-    const message = `Resource not found with id of ${err.value}`;
+    const message = `Resource not found with invalid id: ${err.value}`;
     error = new ApiError(404, message);
   }
 
   // Handle Mongoose Duplicate Key Error (11000)
   if (err.code === 11000) {
-    const field = Object.keys(err.keyValue)[0];
-    const message = `Duplicate value entered for '${field}' field. Please use another value.`;
+    const field = Object.keys(err.keyValue || {})[0] || 'field';
+    const message = `Duplicate value entered for '${field}'. Please use another unique value.`;
     error = new ApiError(409, message);
   }
 
   // Handle Mongoose Validation Errors
   if (err.name === 'ValidationError') {
-    const messages = Object.values(err.errors).map((val) => val.message);
-    const message = `Validation Error: ${messages.join(', ')}`;
-    error = new ApiError(400, message, messages);
+    const errors = Object.values(err.errors || {}).map((val) => ({
+      field: val.path,
+      message: val.message,
+    }));
+    const message = `Validation Error: ${errors.map(e => e.message).join(', ')}`;
+    error = new ApiError(400, message, errors);
   }
 
   // Handle JWT Malformed Error
@@ -42,10 +46,10 @@ const errorHandlerMiddleware = (err, req, res, next) => {
 
   const response = {
     success: false,
-    statusCode: error.statusCode,
-    message: error.message,
+    statusCode: error.statusCode || 500,
+    message: error.message || 'An unexpected error occurred',
     ...(error.errors && error.errors.length > 0 && { errors: error.errors }),
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+    ...(ENV.NODE_ENV === 'development' && { stack: error.stack }),
   };
 
   return res.status(error.statusCode || 500).json(response);
