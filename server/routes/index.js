@@ -3,6 +3,7 @@ import authRoutes from './authRoutes.js';
 import categoryRoutes from './categoryRoutes.js';
 import locationRoutes from './locationRoutes.js';
 import testRoutes from './testRoutes.js';
+import rbacTestRoutes from './rbacTestRoutes.js';
 
 const router = Router();
 
@@ -12,6 +13,9 @@ router.use('/auth', authRoutes);
 // Taxonomy Module Routes
 router.use('/taxonomy/categories', categoryRoutes);
 router.use('/taxonomy/locations', locationRoutes);
+
+// RBAC & Ownership Security Verification Routes
+router.use('/rbac-test', rbacTestRoutes);
 
 // Foundation Diagnostic & Test Routes
 router.use('/test', testRoutes);
