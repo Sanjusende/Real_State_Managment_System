@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authRoutes from './authRoutes.js';
+import propertyRoutes from './propertyRoutes.js';
 import categoryRoutes from './categoryRoutes.js';
 import locationRoutes from './locationRoutes.js';
 import testRoutes from './testRoutes.js';
@@ -9,6 +10,9 @@ const router = Router();
 
 // Authentication Module Routes
 router.use('/auth', authRoutes);
+
+// Property Management Module Routes
+router.use('/properties', propertyRoutes);
 
 // Taxonomy Module Routes
 router.use('/taxonomy/categories', categoryRoutes);
