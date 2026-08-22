@@ -1,0 +1,37 @@
+export const ROLES = {
+  USER: 'USER',
+  BUYER: 'USER', // alias for buyer
+  AGENT: 'AGENT',
+  SELLER: 'SELLER',
+  ADMIN: 'ADMIN',
+};
+
+export const ROLE_LIST = [ROLES.USER, ROLES.AGENT, ROLES.SELLER, ROLES.ADMIN];
+
+export const PROPERTY_TYPES = [
+  'APARTMENT',
+  'VILLA',
+  'HOUSE',
+  'COMMERCIAL',
+  'OFFICE',
+  'PLOT',
+  'PENTHOUSE',
+  'STUDIO',
+  'OTHER',
+];
+
+export const LISTING_TYPES = ['SALE', 'RENT', 'LEASE'];
+
+export const PROPERTY_STATUS = ['AVAILABLE', 'UNDER_OFFER', 'SOLD', 'RENTED', 'INACTIVE'];
+
+export const APPROVAL_STATUS = ['PENDING', 'APPROVED', 'REJECTED'];
+
+export const ENQUIRY_STATUS = ['PENDING', 'CONTACTED', 'RESOLVED', 'CLOSED'];
+
+export const REPORT_STATUS = ['PENDING', 'INVESTIGATING', 'RESOLVED', 'DISMISSED'];
+
+export const PAGINATION = {
+  DEFAULT_PAGE: 1,
+  DEFAULT_LIMIT: 10,
+  MAX_LIMIT: 50,
+};
