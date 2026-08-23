@@ -37,51 +37,53 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-white">
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 text-slate-900">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link to="/" className="inline-flex items-center gap-2 mb-4 group">
-          <div className="bg-blue-600 p-2.5 rounded-2xl shadow-lg shadow-blue-500/30 group-hover:scale-105 transition">
-            <Building2 className="w-7 h-7 text-white" />
+          <div className="w-11 h-11 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/30 group-hover:scale-105 transition">
+            <Building2 className="w-6 h-6" />
           </div>
-          <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-100 to-blue-200 bg-clip-text text-transparent">
-            EstateCraft Pro
+          <span className="text-2xl font-extrabold tracking-tight text-slate-900">
+            Estate<span className="text-emerald-600">Craft</span>
           </span>
         </Link>
-        <h2 className="text-3xl font-extrabold tracking-tight">Create your account</h2>
-        <p className="mt-2 text-sm text-slate-400">
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+          Create your account
+        </h2>
+        <p className="mt-2 text-xs sm:text-sm text-slate-500">
           Already have an account?{' '}
-          <Link to="/login" className="font-medium text-blue-400 hover:text-blue-300 transition">
+          <Link to="/login" className="font-semibold text-emerald-600 hover:text-emerald-700 transition">
             Sign in here
           </Link>
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-xl px-4">
-        <div className="bg-slate-800/80 backdrop-blur-xl py-8 px-6 shadow-2xl rounded-3xl sm:px-10 border border-slate-700/80">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        <div className="bg-white py-8 px-6 shadow-xl shadow-slate-900/5 rounded-3xl sm:px-10 border border-slate-200/90">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             {/* Account Role Selector */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-3">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-2">
                 Select Your Role
               </label>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-2.5">
                 {[
-                  { id: 'USER', label: 'Buyer / Renter', desc: 'Browse & contact' },
+                  { id: 'USER', label: 'Buyer / Renter', desc: 'Browse & save' },
                   { id: 'AGENT', label: 'Real Estate Agent', desc: 'Manage client leads' },
-                  { id: 'SELLER', label: 'Property Owner', desc: 'List own properties' },
+                  { id: 'SELLER', label: 'Property Owner', desc: 'List properties' },
                 ].map((r) => (
                   <button
                     key={r.id}
                     type="button"
                     onClick={() => handleRoleSelect(r.id)}
-                    className={`p-3 rounded-2xl border text-left transition ${
+                    className={`p-3 rounded-2xl border text-left transition cursor-pointer ${
                       formData.role === r.id
-                        ? 'border-blue-500 bg-blue-600/20 text-white ring-2 ring-blue-500/40'
-                        : 'border-slate-700 bg-slate-900/60 text-slate-400 hover:border-slate-600'
+                        ? 'border-emerald-500 bg-emerald-50/80 text-slate-900 ring-2 ring-emerald-500/20'
+                        : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:border-slate-300'
                     }`}
                   >
-                    <span className="block text-xs font-bold text-white mb-0.5">{r.label}</span>
-                    <span className="block text-[11px] text-slate-400 leading-tight">{r.desc}</span>
+                    <span className="block text-xs font-bold text-slate-900 mb-0.5">{r.label}</span>
+                    <span className="block text-[10px] text-slate-500 leading-tight">{r.desc}</span>
                   </button>
                 ))}
               </div>
@@ -89,12 +91,12 @@ export default function Register() {
 
             {/* Name */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Full Name
               </label>
-              <div className="relative rounded-xl shadow-sm">
+              <div className="relative rounded-xl">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <UserIcon className="h-5 w-5" />
+                  <UserIcon className="h-4 w-4" />
                 </div>
                 <input
                   type="text"
@@ -103,19 +105,19 @@ export default function Register() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Sarah Jenkins"
-                  className="block w-full pl-11 pr-4 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition"
+                  className="block w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500 text-sm transition"
                 />
               </div>
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Email Address
               </label>
-              <div className="relative rounded-xl shadow-sm">
+              <div className="relative rounded-xl">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Mail className="h-5 w-5" />
+                  <Mail className="h-4 w-4" />
                 </div>
                 <input
                   type="email"
@@ -124,7 +126,7 @@ export default function Register() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="sarah@example.com"
-                  className="block w-full pl-11 pr-4 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition"
+                  className="block w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500 text-sm transition"
                 />
               </div>
             </div>
@@ -132,12 +134,12 @@ export default function Register() {
             {/* Phone & Optional Agency */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Phone Number
                 </label>
-                <div className="relative rounded-xl shadow-sm">
+                <div className="relative rounded-xl">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <Phone className="h-5 w-5" />
+                    <Phone className="h-4 w-4" />
                   </div>
                   <input
                     type="tel"
@@ -145,19 +147,19 @@ export default function Register() {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="+91 98765 43210"
-                    className="block w-full pl-11 pr-4 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition"
+                    className="block w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500 text-sm transition"
                   />
                 </div>
               </div>
 
               {formData.role === 'AGENT' && (
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Agency Name
                   </label>
-                  <div className="relative rounded-xl shadow-sm">
+                  <div className="relative rounded-xl">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                      <Briefcase className="h-5 w-5" />
+                      <Briefcase className="h-4 w-4" />
                     </div>
                     <input
                       type="text"
@@ -165,7 +167,7 @@ export default function Register() {
                       value={formData.agencyName}
                       onChange={handleChange}
                       placeholder="Apex Realty Partners"
-                      className="block w-full pl-11 pr-4 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition"
+                      className="block w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500 text-sm transition"
                     />
                   </div>
                 </div>
@@ -174,12 +176,12 @@ export default function Register() {
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Password
               </label>
-              <div className="relative rounded-xl shadow-sm">
+              <div className="relative rounded-xl">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="h-5 w-5" />
+                  <Lock className="h-4 w-4" />
                 </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -188,14 +190,14 @@ export default function Register() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Minimum 6 characters"
-                  className="block w-full pl-11 pr-11 py-3 bg-slate-900/90 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition"
+                  className="block w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500 text-sm transition"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 transition"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition cursor-pointer"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
@@ -204,7 +206,7 @@ export default function Register() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-lg shadow-blue-600/30 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition transform active:scale-[0.98]"
+                className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 transition cursor-pointer"
               >
                 {isSubmitting ? (
                   <>
