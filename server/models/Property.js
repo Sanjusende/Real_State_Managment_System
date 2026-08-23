@@ -263,10 +263,16 @@ propertySchema.index(
   }
 );
 
-// Compound indexes for public catalog performance
+// Compound and multi-key indexes for public catalog performance
 propertySchema.index({ approvalStatus: 1, status: 1, price: 1 });
 propertySchema.index({ approvalStatus: 1, status: 1, city: 1, propertyType: 1 });
+propertySchema.index({ approvalStatus: 1, status: 1, city: 1, price: 1 });
+propertySchema.index({ approvalStatus: 1, status: 1, propertyType: 1, listingType: 1, price: 1 });
+propertySchema.index({ approvalStatus: 1, status: 1, views: -1, createdAt: -1 });
+propertySchema.index({ approvalStatus: 1, status: 1, bedrooms: 1, bathrooms: 1 });
 propertySchema.index({ approvalStatus: 1, isFeatured: 1, createdAt: -1 });
+propertySchema.index({ city: 1, state: 1 });
+propertySchema.index({ amenities: 1 });
 propertySchema.index({ owner: 1, createdAt: -1 });
 propertySchema.index({ agent: 1, createdAt: -1 });
 

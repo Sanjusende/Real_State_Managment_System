@@ -53,8 +53,8 @@ export const createProperty = async (propertyData, user) => {
     title: title.trim(),
     slug,
     description: description.trim(),
-    propertyType,
-    listingType: listingType || 'SALE',
+    propertyType: propertyType.toUpperCase(),
+    listingType: listingType ? listingType.toUpperCase() : 'SALE',
     price: Number(price),
     priceUnit: priceUnit || 'INR',
     area: Number(area),
@@ -64,12 +64,16 @@ export const createProperty = async (propertyData, user) => {
     balconies: Number(balconies) || 0,
     floor: Number(floor) || 0,
     totalFloors: Number(totalFloors) || 1,
-    furnishingStatus: furnishingStatus || 'UNFURNISHED',
-    constructionStatus: constructionStatus || 'READY_TO_MOVE',
+    furnishingStatus: furnishingStatus ? furnishingStatus.toUpperCase() : 'UNFURNISHED',
+    constructionStatus: constructionStatus ? constructionStatus.toUpperCase() : 'READY_TO_MOVE',
     possessionDate: possessionDate || null,
     yearBuilt: yearBuilt || null,
     parking: Number(parking) || 0,
-    amenities: Array.isArray(amenities) ? amenities : [],
+    amenities: Array.isArray(amenities)
+      ? amenities
+      : typeof amenities === 'string'
+      ? amenities.split(',').map((a) => a.trim()).filter(Boolean)
+      : [],
     images: Array.isArray(images) ? images : [],
     thumbnail: thumbnail || (images && images.length > 0 ? images[0].url : ''),
     address: address.trim(),
@@ -94,68 +98,247 @@ export const createProperty = async (propertyData, user) => {
 };
 
 /**
- * Query all properties with public filtering, sorting, and pagination
+ * Escape special regex characters in strings for safe MongoDB regex queries
+ */
+const escapeRegex = (string) => {
+  return String(string).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
+/**
+ * Advanced Property Search & Filtering Query Engine
  */
 export const getAllProperties = async (queryParams = {}, user = null) => {
   const page = Math.max(1, parseInt(queryParams.page || PAGINATION.DEFAULT_PAGE, 10));
-  const limit = Math.min(PAGINATION.MAX_LIMIT, Math.max(1, parseInt(queryParams.limit || PAGINATION.DEFAULT_LIMIT, 10)));
+  const limit = Math.min(
+    PAGINATION.MAX_LIMIT,
+    Math.max(1, parseInt(queryParams.limit || PAGINATION.DEFAULT_LIMIT, 10))
+  );
   const skip = (page - 1) * limit;
 
   const filter = {};
 
-  // Public access only sees APPROVED properties
+  // 1. Administrative / Public Approval Visibility Guard
   const isAdmin = user && user.role === ROLES.ADMIN;
   if (!isAdmin) {
     filter.approvalStatus = 'APPROVED';
-    filter.status = queryParams.status || 'AVAILABLE';
-  } else if (queryParams.approvalStatus) {
-    filter.approvalStatus = queryParams.approvalStatus;
+    filter.status = queryParams.status ? queryParams.status.toUpperCase() : 'AVAILABLE';
+  } else {
+    if (queryParams.approvalStatus) {
+      filter.approvalStatus = queryParams.approvalStatus.toUpperCase();
+    }
+    if (queryParams.status) {
+      filter.status = queryParams.status.toUpperCase();
+    }
   }
 
-  // Filter by listing type (SALE, RENT, LEASE)
-  if (queryParams.listingType) {
-    filter.listingType = queryParams.listingType.toUpperCase();
+  // 2. Keyword / Full-Text Search
+  const searchQuery = queryParams.keyword || queryParams.search || queryParams.q;
+  if (searchQuery && typeof searchQuery === 'string' && searchQuery.trim().length > 0) {
+    const words = searchQuery.trim().split(/\s+/).filter(Boolean);
+    if (words.length === 1) {
+      const sanitized = escapeRegex(words[0]);
+      filter.$or = [
+        { title: { $regex: sanitized, $options: 'i' } },
+        { description: { $regex: sanitized, $options: 'i' } },
+        { city: { $regex: sanitized, $options: 'i' } },
+        { state: { $regex: sanitized, $options: 'i' } },
+        { address: { $regex: sanitized, $options: 'i' } },
+        { pincode: { $regex: sanitized, $options: 'i' } },
+      ];
+    } else if (words.length > 1) {
+      filter.$and = words.map((word) => {
+        const sanitized = escapeRegex(word);
+        return {
+          $or: [
+            { title: { $regex: sanitized, $options: 'i' } },
+            { description: { $regex: sanitized, $options: 'i' } },
+            { city: { $regex: sanitized, $options: 'i' } },
+            { state: { $regex: sanitized, $options: 'i' } },
+            { address: { $regex: sanitized, $options: 'i' } },
+            { pincode: { $regex: sanitized, $options: 'i' } },
+          ],
+        };
+      });
+    }
   }
 
-  // Filter by property type
-  if (queryParams.propertyType) {
-    filter.propertyType = queryParams.propertyType.toUpperCase();
-  }
-
-  // Filter by city
+  // 3. Location Filters (City & State)
   if (queryParams.city) {
-    filter.city = new RegExp(`^${queryParams.city.trim()}$`, 'i');
+    const cities = queryParams.city
+      .split(',')
+      .map((c) => c.trim())
+      .filter(Boolean);
+
+    if (cities.length === 1) {
+      filter.city = { $regex: new RegExp(`^${escapeRegex(cities[0])}$`, 'i') };
+    } else if (cities.length > 1) {
+      filter.city = { $in: cities.map((c) => new RegExp(`^${escapeRegex(c)}$`, 'i')) };
+    }
   }
 
-  // Filter by price range
-  if (queryParams.minPrice || queryParams.maxPrice) {
+  if (queryParams.state) {
+    const states = queryParams.state
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    if (states.length === 1) {
+      filter.state = { $regex: new RegExp(`^${escapeRegex(states[0])}$`, 'i') };
+    } else if (states.length > 1) {
+      filter.state = { $in: states.map((s) => new RegExp(`^${escapeRegex(s)}$`, 'i')) };
+    }
+  }
+
+  // 4. Property Types (Supports single value or comma-separated list e.g. 'Apartment,Villa')
+  if (queryParams.propertyType) {
+    const types = queryParams.propertyType
+      .split(',')
+      .map((t) => t.trim().toUpperCase())
+      .filter(Boolean);
+
+    if (types.length === 1) {
+      filter.propertyType = types[0];
+    } else if (types.length > 1) {
+      filter.propertyType = { $in: types };
+    }
+  }
+
+  // 5. Listing Type (SALE, RENT, LEASE)
+  if (queryParams.listingType) {
+    const listingTypes = queryParams.listingType
+      .split(',')
+      .map((l) => l.trim().toUpperCase())
+      .filter(Boolean);
+
+    if (listingTypes.length === 1) {
+      filter.listingType = listingTypes[0];
+    } else if (listingTypes.length > 1) {
+      filter.listingType = { $in: listingTypes };
+    }
+  }
+
+  // 6. Price Range Filter
+  if (queryParams.minPrice !== undefined || queryParams.maxPrice !== undefined) {
     filter.price = {};
-    if (queryParams.minPrice) filter.price.$gte = Number(queryParams.minPrice);
-    if (queryParams.maxPrice) filter.price.$lte = Number(queryParams.maxPrice);
+    if (queryParams.minPrice !== undefined && !isNaN(Number(queryParams.minPrice))) {
+      filter.price.$gte = Number(queryParams.minPrice);
+    }
+    if (queryParams.maxPrice !== undefined && !isNaN(Number(queryParams.maxPrice))) {
+      filter.price.$lte = Number(queryParams.maxPrice);
+    }
   }
 
-  // Filter by bedrooms
-  if (queryParams.bedrooms) {
+  // 7. Area Range Filter
+  if (queryParams.minArea !== undefined || queryParams.maxArea !== undefined || queryParams.area !== undefined) {
+    filter.area = {};
+    if (queryParams.minArea !== undefined && !isNaN(Number(queryParams.minArea))) {
+      filter.area.$gte = Number(queryParams.minArea);
+    } else if (queryParams.area !== undefined && !isNaN(Number(queryParams.area))) {
+      filter.area.$gte = Number(queryParams.area);
+    }
+    if (queryParams.maxArea !== undefined && !isNaN(Number(queryParams.maxArea))) {
+      filter.area.$lte = Number(queryParams.maxArea);
+    }
+  }
+
+  // 8. Room Specifications (Bedrooms, Bathrooms, Balconies)
+  if (queryParams.bedrooms !== undefined && !isNaN(Number(queryParams.bedrooms))) {
     filter.bedrooms = { $gte: Number(queryParams.bedrooms) };
   }
+  if (queryParams.minBedrooms !== undefined && !isNaN(Number(queryParams.minBedrooms))) {
+    filter.bedrooms = filter.bedrooms || {};
+    filter.bedrooms.$gte = Number(queryParams.minBedrooms);
+  }
+  if (queryParams.maxBedrooms !== undefined && !isNaN(Number(queryParams.maxBedrooms))) {
+    filter.bedrooms = filter.bedrooms || {};
+    filter.bedrooms.$lte = Number(queryParams.maxBedrooms);
+  }
 
-  // Filter by featured
+  if (queryParams.bathrooms !== undefined && !isNaN(Number(queryParams.bathrooms))) {
+    filter.bathrooms = { $gte: Number(queryParams.bathrooms) };
+  }
+  if (queryParams.minBathrooms !== undefined && !isNaN(Number(queryParams.minBathrooms))) {
+    filter.bathrooms = filter.bathrooms || {};
+    filter.bathrooms.$gte = Number(queryParams.minBathrooms);
+  }
+  if (queryParams.maxBathrooms !== undefined && !isNaN(Number(queryParams.maxBathrooms))) {
+    filter.bathrooms = filter.bathrooms || {};
+    filter.bathrooms.$lte = Number(queryParams.maxBathrooms);
+  }
+
+  if (queryParams.balconies !== undefined && !isNaN(Number(queryParams.balconies))) {
+    filter.balconies = { $gte: Number(queryParams.balconies) };
+  }
+
+  // 9. Furnishing & Construction Status
+  if (queryParams.furnishingStatus) {
+    const statuses = queryParams.furnishingStatus
+      .split(',')
+      .map((s) => s.trim().toUpperCase().replace(/[-\s]/g, '_'))
+      .filter(Boolean);
+    filter.furnishingStatus = statuses.length === 1 ? statuses[0] : { $in: statuses };
+  }
+
+  if (queryParams.constructionStatus) {
+    const statuses = queryParams.constructionStatus
+      .split(',')
+      .map((s) => s.trim().toUpperCase().replace(/[-\s]/g, '_'))
+      .filter(Boolean);
+    filter.constructionStatus = statuses.length === 1 ? statuses[0] : { $in: statuses };
+  }
+
+  // 10. Multi-Amenities Filter (Matches all specified amenities case-insensitively)
+  if (queryParams.amenities) {
+    const requestedAmenities = (
+      Array.isArray(queryParams.amenities)
+        ? queryParams.amenities
+        : queryParams.amenities.split(',')
+    )
+      .map((a) => a.trim())
+      .filter(Boolean);
+
+    if (requestedAmenities.length > 0) {
+      filter.amenities = {
+        $all: requestedAmenities.map((amenity) => new RegExp(`^${escapeRegex(amenity)}$`, 'i')),
+      };
+    }
+  }
+
+  // 11. Featured Filter
   if (queryParams.isFeatured !== undefined) {
     filter.isFeatured = queryParams.isFeatured === 'true' || queryParams.isFeatured === true;
   }
 
-  // Text search
-  if (queryParams.search) {
-    filter.$text = { $search: queryParams.search.trim() };
+  // 12. Sorting Execution
+  const sortParam = (queryParams.sort || 'newest').toLowerCase().trim();
+  let sort = { createdAt: -1 }; // Default newest
+
+  switch (sortParam) {
+    case 'oldest':
+      sort = { createdAt: 1 };
+      break;
+    case 'price-low-high':
+    case 'price-asc':
+      sort = { price: 1, createdAt: -1 };
+      break;
+    case 'price-high-low':
+    case 'price-desc':
+      sort = { price: -1, createdAt: -1 };
+      break;
+    case 'most-viewed':
+    case 'popular':
+      sort = { views: -1, createdAt: -1 };
+      break;
+    case 'featured':
+      sort = { isFeatured: -1, createdAt: -1 };
+      break;
+    case 'newest':
+    default:
+      sort = { createdAt: -1 };
+      break;
   }
 
-  // Sort criteria
-  let sort = { createdAt: -1 }; // Default newest
-  if (queryParams.sort === 'price-asc') sort = { price: 1 };
-  if (queryParams.sort === 'price-desc') sort = { price: -1 };
-  if (queryParams.sort === 'popular') sort = { views: -1 };
-  if (queryParams.sort === 'featured') sort = { isFeatured: -1, createdAt: -1 };
-
+  // Database Execution with Projection Optimization, Population & Lean Query Execution
   const [properties, total] = await Promise.all([
     Property.find(filter)
       .sort(sort)
@@ -164,18 +347,19 @@ export const getAllProperties = async (queryParams = {}, user = null) => {
       .populate('owner', 'name email phone avatar agencyName')
       .populate('agent', 'name email phone avatar agencyName')
       .populate('category', 'name slug icon')
-      .populate('location', 'city state'),
+      .populate('location', 'city state')
+      .lean(),
     Property.countDocuments(filter),
   ]);
 
+  const totalPages = Math.ceil(total / limit) || 0;
+
   return {
     properties,
-    meta: {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit) || 1,
-    },
+    total,
+    page,
+    limit,
+    totalPages,
   };
 };
 
@@ -247,8 +431,8 @@ export const getMyProperties = async (user, queryParams = {}) => {
     $or: [{ owner: userId }, { agent: userId }],
   };
 
-  if (queryParams.status) filter.status = queryParams.status;
-  if (queryParams.approvalStatus) filter.approvalStatus = queryParams.approvalStatus;
+  if (queryParams.status) filter.status = queryParams.status.toUpperCase();
+  if (queryParams.approvalStatus) filter.approvalStatus = queryParams.approvalStatus.toUpperCase();
 
   const [properties, total] = await Promise.all([
     Property.find(filter)
@@ -260,14 +444,16 @@ export const getMyProperties = async (user, queryParams = {}) => {
     Property.countDocuments(filter),
   ]);
 
+  const totalPages = Math.ceil(total / limit) || 0;
+
   return {
     properties,
-    meta: {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit) || 1,
-    },
+    total,
+    page,
+    limit,
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
   };
 };
 
@@ -293,6 +479,9 @@ export const updateProperty = async (id, updateData, user) => {
   if (updateData.title && updateData.title.trim() !== property.title) {
     updateData.slug = await generateUniquePropertySlug(updateData.title, property._id);
   }
+
+  if (updateData.propertyType) updateData.propertyType = updateData.propertyType.toUpperCase();
+  if (updateData.listingType) updateData.listingType = updateData.listingType.toUpperCase();
 
   // Prevent regular users from modifying approvalStatus or isFeatured directly via general update
   if (!isAdmin) {
@@ -351,7 +540,7 @@ export const updatePropertyStatus = async (id, status, user) => {
     throw new ApiError(403, 'Forbidden: You do not have permission to update status for this listing');
   }
 
-  property.status = status;
+  property.status = status.toUpperCase();
   await property.save();
 
   return property;
@@ -367,7 +556,7 @@ export const updatePropertyApproval = async (id, approvalStatus, adminUser) => {
 
   const property = await Property.findByIdAndUpdate(
     id,
-    { approvalStatus },
+    { approvalStatus: approvalStatus.toUpperCase() },
     { new: true, runValidators: true }
   )
     .populate('owner', 'name email phone avatar agencyName')

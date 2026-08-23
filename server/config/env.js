@@ -20,8 +20,8 @@ export const ENV = {
 
   RATE_LIMIT: {
     WINDOW_MS: 15 * 60 * 1000, // 15 minutes
-    MAX_REQUESTS: 100, // max 100 requests per window
-    AUTH_MAX_REQUESTS: 10, // max 10 auth requests per window
+    MAX_REQUESTS: process.env.NODE_ENV === 'production' ? 100 : 10000,
+    AUTH_MAX_REQUESTS: process.env.NODE_ENV === 'production' ? 20 : 5000,
   },
 };
 

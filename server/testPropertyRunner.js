@@ -139,7 +139,8 @@ const runPropertyTests = async () => {
     // Test 2: Public Catalog Check for Pending Property
     console.log('\n[Test 2] Public querying property catalog (GET /api/v1/properties)...');
     const publicCatalogRes = await testEndpoint('/api/v1/properties');
-    const foundInPublic = (publicCatalogRes.body.data || []).some((p) => p._id === createdPropertyId);
+    const publicProps = Array.isArray(publicCatalogRes.body.data) ? publicCatalogRes.body.data : (publicCatalogRes.body.data?.properties || []);
+    const foundInPublic = publicProps.some((p) => p._id === createdPropertyId);
     console.log(` -> Status: ${publicCatalogRes.status}`);
     console.log(` -> Pending property excluded from public catalog: ${!foundInPublic ? '✅ PASS (Excluded)' : '❌ FAIL (Visible)'}`);
 
@@ -148,7 +149,8 @@ const runPropertyTests = async () => {
     const adminCatalogRes = await testEndpoint('/api/v1/properties?approvalStatus=PENDING', 'GET', null, {
       Authorization: `Bearer ${tokens.admin}`,
     });
-    const foundInAdmin = (adminCatalogRes.body.data || []).some((p) => p._id === createdPropertyId);
+    const adminProps = Array.isArray(adminCatalogRes.body.data) ? adminCatalogRes.body.data : (adminCatalogRes.body.data?.properties || []);
+    const foundInAdmin = adminProps.some((p) => p._id === createdPropertyId);
     console.log(` -> Status: ${adminCatalogRes.status}`);
     console.log(` -> Pending property found in admin queue: ${foundInAdmin ? '✅ PASS (Found)' : '❌ FAIL'}`);
 
