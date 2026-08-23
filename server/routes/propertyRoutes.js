@@ -21,12 +21,13 @@ import {
   validatePropertyApproval,
   validatePropertyFeatured,
 } from '../validators/propertyValidators.js';
+import { validatePropertyQuery } from '../validators/searchValidators.js';
 import { ROLES } from '../config/constants.js';
 
 const router = Router();
 
-// Public / General Catalog Queries
-router.get('/', optionalAuth, getProperties);
+// Public / General Catalog Queries with Query Validation
+router.get('/', optionalAuth, validate(validatePropertyQuery, 'query'), getProperties);
 router.get('/slug/:slug', optionalAuth, getPropertyBySlug);
 
 // Authenticated Agent / Seller My-Properties

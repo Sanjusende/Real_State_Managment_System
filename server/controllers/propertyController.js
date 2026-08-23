@@ -9,7 +9,7 @@ export const createProperty = asyncHandler(async (req, res) => {
 
 export const getProperties = asyncHandler(async (req, res) => {
   const result = await propertyService.getAllProperties(req.query, req.user);
-  res.status(200).json(new ApiResponse(200, 'Properties retrieved successfully', result.properties, result.meta));
+  res.status(200).json(new ApiResponse(200, 'Properties retrieved successfully', result));
 });
 
 export const getProperty = asyncHandler(async (req, res) => {
@@ -24,7 +24,7 @@ export const getPropertyBySlug = asyncHandler(async (req, res) => {
 
 export const getMyProperties = asyncHandler(async (req, res) => {
   const result = await propertyService.getMyProperties(req.user, req.query);
-  res.status(200).json(new ApiResponse(200, 'My properties retrieved successfully', result.properties, result.meta));
+  res.status(200).json(new ApiResponse(200, 'My properties retrieved successfully', result));
 });
 
 export const updateProperty = asyncHandler(async (req, res) => {
