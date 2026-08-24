@@ -14,6 +14,7 @@ import DashboardLayout from '../../../components/dashboard/DashboardLayout';
 import Button from '../../../components/common/Button';
 import FormInput from '../../../components/common/FormInput';
 import FormSelect from '../../../components/common/FormSelect';
+import ImageUploader from '../../../components/common/ImageUploader';
 import { createProperty } from '../../../services/dashboardService';
 
 const PROPERTY_TYPES = [
@@ -81,15 +82,14 @@ export default function AgentPropertyCreatePage() {
     constructionStatus: 'READY_TO_MOVE',
     possessionDate: '',
     yearBuilt: '2024',
-    thumbnail: '',
-    imageUrl1: '',
-    imageUrl2: '',
     address: '',
     city: 'Bhopal',
     state: 'Madhya Pradesh',
     pincode: '462016',
     amenities: ['24/7 Security', 'Lift', 'Parking', 'Power Backup'],
   });
+
+  const [images, setImages] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -118,10 +118,7 @@ export default function AgentPropertyCreatePage() {
 
     setSubmitting(true);
     try {
-      const images = [];
-      if (form.thumbnail) images.push({ url: form.thumbnail, isThumbnail: true });
-      if (form.imageUrl1) images.push({ url: form.imageUrl1 });
-      if (form.imageUrl2) images.push({ url: form.imageUrl2 });
+      const thumbnailImg = images.find((img) => img.isThumbnail) || images[0];
 
       const payload = {
         ...form,
@@ -134,7 +131,7 @@ export default function AgentPropertyCreatePage() {
         totalFloors: Number(form.totalFloors) || 1,
         yearBuilt: Number(form.yearBuilt) || new Date().getFullYear(),
         images: images.length > 0 ? images : undefined,
-        thumbnail: form.thumbnail || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80',
+        thumbnail: thumbnailImg?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80',
       };
 
       await createProperty(payload);
@@ -368,36 +365,13 @@ export default function AgentPropertyCreatePage() {
           </div>
         </div>
 
-        {/* 5. Photos & Media URLs */}
+        {/* 5. Production Image Upload */}
         <div className="bg-white rounded-3xl border border-slate-200/90 p-6 md:p-8 shadow-xs space-y-4">
           <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
-            5. Photos & Thumbnail URLs
+            5. Property Photos & Gallery
           </h2>
 
-          <FormInput
-            label="Main Thumbnail Image URL"
-            name="thumbnail"
-            value={form.thumbnail}
-            onChange={handleChange}
-            placeholder="https://images.unsplash.com/photo-..."
-          />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormInput
-              label="Gallery Image 1"
-              name="imageUrl1"
-              value={form.imageUrl1}
-              onChange={handleChange}
-              placeholder="https://..."
-            />
-            <FormInput
-              label="Gallery Image 2"
-              name="imageUrl2"
-              value={form.imageUrl2}
-              onChange={handleChange}
-              placeholder="https://..."
-            />
-          </div>
+          <ImageUploader images={images} onChange={setImages} maxImages={10} />
         </div>
 
         {/* Submit Buttons */}

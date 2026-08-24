@@ -9,6 +9,7 @@ import adminRoutes from './adminRoutes.js';
 import notificationRoutes from './notificationRoutes.js';
 import reviewRoutes from './reviewRoutes.js';
 import reportRoutes from './reportRoutes.js';
+import uploadRoutes from './uploadRoutes.js';
 import testRoutes from './testRoutes.js';
 import rbacTestRoutes from './rbacTestRoutes.js';
 
@@ -22,6 +23,9 @@ router.use('/auth', authRoutes);
 
 // Property Management Module Routes
 router.use('/properties', propertyRoutes);
+
+// Media & Asset Upload Routes (Multer + Cloudinary)
+router.use('/upload', uploadRoutes);
 
 // Enquiry Module Routes
 router.use('/enquiries', enquiryRoutes);

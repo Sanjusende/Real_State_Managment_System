@@ -6,6 +6,7 @@ import DashboardLayout from '../../../components/dashboard/DashboardLayout';
 import Button from '../../../components/common/Button';
 import FormInput from '../../../components/common/FormInput';
 import FormSelect from '../../../components/common/FormSelect';
+import ImageUploader from '../../../components/common/ImageUploader';
 import { getPropertyById } from '../../../services/propertyService';
 import { updateProperty } from '../../../services/dashboardService';
 
@@ -27,6 +28,7 @@ export default function SellerPropertyEditPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [images, setImages] = useState([]);
 
   const [form, setForm] = useState({
     title: '',
@@ -40,7 +42,6 @@ export default function SellerPropertyEditPage() {
     address: '',
     city: '',
     state: '',
-    thumbnail: '',
   });
 
   useEffect(() => {
@@ -62,8 +63,21 @@ export default function SellerPropertyEditPage() {
             address: p.address || '',
             city: p.city || '',
             state: p.state || '',
-            thumbnail: p.thumbnail || '',
           });
+
+          if (p.images && p.images.length > 0) {
+            setImages(
+              p.images.map((img, idx) => ({
+                url: img.url || img,
+                publicId: img.publicId || '',
+                isThumbnail: img.isThumbnail || idx === 0,
+                alt: img.alt || '',
+                order: img.order !== undefined ? img.order : idx,
+              }))
+            );
+          } else if (p.thumbnail) {
+            setImages([{ url: p.thumbnail, isThumbnail: true, alt: 'Thumbnail', order: 0 }]);
+          }
         }
       } catch (err) {
         toast.error('Failed to load property details.');
@@ -82,12 +96,16 @@ export default function SellerPropertyEditPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
+      const thumbnailImg = images.find((img) => img.isThumbnail) || images[0];
+
       const payload = {
         ...form,
         price: Number(form.price),
         area: Number(form.area),
         bedrooms: Number(form.bedrooms) || 0,
         bathrooms: Number(form.bathrooms) || 0,
+        images: images.length > 0 ? images : undefined,
+        thumbnail: thumbnailImg?.url || undefined,
       };
       await updateProperty(id, payload);
       toast.success('Property updated successfully!');
@@ -110,7 +128,7 @@ export default function SellerPropertyEditPage() {
   return (
     <DashboardLayout
       title={`Edit Property: ${form.title}`}
-      subtitle="Modify price, description, or address."
+      subtitle="Modify price, description, or photos."
     >
       <div className="mb-6">
         <Link
@@ -210,12 +228,13 @@ export default function SellerPropertyEditPage() {
             />
           </div>
 
-          <FormInput
-            label="Thumbnail URL"
-            name="thumbnail"
-            value={form.thumbnail}
-            onChange={handleChange}
-          />
+          {/* Property Photos & Gallery */}
+          <div className="pt-2">
+            <label className="block text-xs font-semibold text-slate-700 mb-2">
+              Property Photos & Gallery
+            </label>
+            <ImageUploader images={images} onChange={setImages} maxImages={8} />
+          </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
