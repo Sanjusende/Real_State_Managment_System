@@ -1,4 +1,5 @@
 import Property from '../models/Property.js';
+import User from '../models/User.js';
 import Notification from '../models/Notification.js';
 import ApiError from '../utils/ApiError.js';
 import { generateUniquePropertySlug } from '../utils/slugifyProperty.js';
@@ -699,5 +700,71 @@ export const getDashboardAnalytics = async (user) => {
     propertyTypeDistribution,
     listingTypeDistribution,
     trendData,
+  };
+};
+
+/**
+ * Toggle Property Favorite (Wishlist) for authenticated user
+ */
+export const toggleFavorite = async (propertyId, userId) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, 'User account not found');
+  }
+
+  if (!user.favorites) user.favorites = [];
+  const targetId = propertyId.toString();
+  const existsIndex = user.favorites.findIndex((f) => f.toString() === targetId);
+
+  let isFavorited = false;
+  if (existsIndex > -1) {
+    user.favorites.splice(existsIndex, 1);
+    isFavorited = false;
+  } else {
+    user.favorites.push(propertyId);
+    isFavorited = true;
+  }
+
+  await user.save();
+
+  return {
+    isFavorited,
+    favoritesCount: user.favorites.length,
+  };
+};
+
+/**
+ * Get authenticated user's favorited properties
+ */
+export const getUserFavorites = async (userId, queryParams = {}) => {
+  const page = Math.max(1, parseInt(queryParams.page || 1, 10));
+  const limit = Math.min(100, Math.max(1, parseInt(queryParams.limit || 20, 10)));
+  const skip = (page - 1) * limit;
+
+  const user = await User.findById(userId).populate({
+    path: 'favorites',
+    match: { approvalStatus: 'APPROVED', status: 'AVAILABLE' },
+    populate: [
+      { path: 'category', select: 'name slug icon' },
+      { path: 'location', select: 'city state' },
+      { path: 'owner', select: 'name email phone avatar agencyName' },
+      { path: 'agent', select: 'name email phone avatar agencyName' },
+    ],
+  });
+
+  if (!user) {
+    throw new ApiError(404, 'User account not found');
+  }
+
+  const validFavorites = (user.favorites || []).filter(Boolean);
+  const total = validFavorites.length;
+  const paginated = validFavorites.slice(skip, skip + limit);
+
+  return {
+    properties: paginated,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit) || 1,
   };
 };

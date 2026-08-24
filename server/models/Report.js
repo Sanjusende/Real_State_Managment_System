@@ -21,11 +21,13 @@ const reportSchema = new mongoose.Schema(
       required: [true, 'Reason for report is required'],
       enum: [
         'INCORRECT_INFORMATION',
+        'MISLEADING_PRICE',
         'FRAUD_OR_SCAM',
         'SPAM_OR_DUPLICATE',
         'OFFENSIVE_CONTENT',
         'UNRESPONSIVE_AGENT',
         'ALREADY_SOLD',
+        'UNAVAILABLE_PROPERTY',
         'OTHER',
       ],
       default: 'OTHER',

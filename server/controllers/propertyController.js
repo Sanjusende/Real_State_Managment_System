@@ -56,3 +56,13 @@ export const getDashboardAnalytics = asyncHandler(async (req, res) => {
   const analytics = await propertyService.getDashboardAnalytics(req.user);
   res.status(200).json(new ApiResponse(200, 'Dashboard analytics retrieved successfully', analytics));
 });
+
+export const toggleFavoriteProperty = asyncHandler(async (req, res) => {
+  const result = await propertyService.toggleFavorite(req.params.id, req.user._id || req.user.id);
+  res.status(200).json(new ApiResponse(200, result.isFavorited ? 'Property added to favorites' : 'Property removed from favorites', result));
+});
+
+export const getFavoriteProperties = asyncHandler(async (req, res) => {
+  const result = await propertyService.getUserFavorites(req.user._id || req.user.id, req.query);
+  res.status(200).json(new ApiResponse(200, 'Favorite properties retrieved successfully', result));
+});
