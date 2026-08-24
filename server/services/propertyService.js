@@ -1,4 +1,5 @@
 import Property from '../models/Property.js';
+import Notification from '../models/Notification.js';
 import ApiError from '../utils/ApiError.js';
 import { generateUniquePropertySlug } from '../utils/slugifyProperty.js';
 import { ROLES, PAGINATION } from '../config/constants.js';
@@ -540,8 +541,28 @@ export const updatePropertyStatus = async (id, status, user) => {
     throw new ApiError(403, 'Forbidden: You do not have permission to update status for this listing');
   }
 
+  const oldStatus = property.status;
   property.status = status.toUpperCase();
   await property.save();
+
+  // If status transitioned to SOLD, dispatch PROPERTY_SOLD notification
+  if (property.status === 'SOLD' && oldStatus !== 'SOLD') {
+    const recipient = property.owner || property.agent;
+    if (recipient) {
+      try {
+        await Notification.create({
+          recipient,
+          sender: user.id || user._id,
+          type: 'PROPERTY_SOLD',
+          title: 'Property Deal Closed! 🤝',
+          message: `Congratulations! "${property.title}" in ${property.city} has been marked as SOLD.`,
+          relatedProperty: property._id,
+        });
+      } catch (notifErr) {
+        console.error('Failed to dispatch property sold notification:', notifErr);
+      }
+    }
+  }
 
   return property;
 };

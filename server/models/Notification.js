@@ -19,6 +19,10 @@ const notificationSchema = new mongoose.Schema(
         'PROPERTY_APPROVED',
         'PROPERTY_REJECTED',
         'NEW_ENQUIRY',
+        'ENQUIRY_RESPONSE',
+        'ACCOUNT_BLOCKED',
+        'REVIEW_ADDED',
+        'PROPERTY_SOLD',
         'PRICE_DROP',
         'SYSTEM_ANNOUNCEMENT',
         'ACCOUNT_VERIFIED',
@@ -39,10 +43,11 @@ const notificationSchema = new mongoose.Schema(
       trim: true,
       maxlength: [2000, 'Message cannot exceed 2000 characters'],
     },
-    property: {
+    relatedProperty: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Property',
       default: null,
+      alias: 'property',
     },
     isRead: {
       type: Boolean,

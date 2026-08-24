@@ -1,5 +1,6 @@
 import Enquiry from '../models/Enquiry.js';
 import Property from '../models/Property.js';
+import Notification from '../models/Notification.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
@@ -34,6 +35,20 @@ export const createEnquiry = asyncHandler(async (req, res) => {
     phone,
     message,
   });
+
+  // Dispatch real-time in-app notification to property consultant/owner
+  try {
+    await Notification.create({
+      recipient,
+      sender: req.user?._id || null,
+      type: 'NEW_ENQUIRY',
+      title: 'New Property Lead! 📩',
+      message: `${name} (${phone}) sent an enquiry regarding "${property.title}": "${message.slice(0, 120)}..."`,
+      relatedProperty: property._id,
+    });
+  } catch (notifErr) {
+    console.error('Failed to dispatch new enquiry notification:', notifErr);
+  }
 
   res.status(201).json(new ApiResponse(201, 'Enquiry submitted successfully', enquiry));
 });
@@ -128,6 +143,22 @@ export const updateEnquiryStatus = asyncHandler(async (req, res) => {
   if (notes !== undefined) enquiry.notes = notes;
 
   await enquiry.save();
+
+  // Notify the prospective buyer if they are an active platform user
+  if (enquiry.sender) {
+    try {
+      await Notification.create({
+        recipient: enquiry.sender,
+        sender: req.user._id,
+        type: 'ENQUIRY_RESPONSE',
+        title: 'Response to your Property Enquiry 💬',
+        message: `Your inquiry has been updated to "${status || enquiry.status}".${notes ? ` Note: "${notes}"` : ''}`,
+        relatedProperty: enquiry.property,
+      });
+    } catch (notifErr) {
+      console.error('Failed to notify inquiry sender:', notifErr);
+    }
+  }
 
   res.status(200).json(new ApiResponse(200, 'Enquiry updated successfully', enquiry));
 });

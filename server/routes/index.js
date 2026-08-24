@@ -6,6 +6,9 @@ import enquiryRoutes from './enquiryRoutes.js';
 import categoryRoutes from './categoryRoutes.js';
 import locationRoutes from './locationRoutes.js';
 import adminRoutes from './adminRoutes.js';
+import notificationRoutes from './notificationRoutes.js';
+import reviewRoutes from './reviewRoutes.js';
+import reportRoutes from './reportRoutes.js';
 import testRoutes from './testRoutes.js';
 import rbacTestRoutes from './rbacTestRoutes.js';
 
@@ -22,6 +25,15 @@ router.use('/properties', propertyRoutes);
 
 // Enquiry Module Routes
 router.use('/enquiries', enquiryRoutes);
+
+// Notification System Module Routes
+router.use('/notifications', notificationRoutes);
+
+// Review & Rating System Module Routes
+router.use('/reviews', reviewRoutes);
+
+// Moderation Report Module Routes
+router.use('/reports', reportRoutes);
 
 // Agent Directory Module Routes
 router.use('/agents', agentRoutes);
