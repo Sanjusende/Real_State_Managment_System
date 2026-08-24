@@ -12,6 +12,7 @@ import {
   Phone,
   Search,
   PlusCircle,
+  LayoutDashboard,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
@@ -26,6 +27,23 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const getDashboardPath = (role) => {
+    if (role === 'ADMIN') return '/admin/dashboard';
+    if (role === 'AGENT') return '/agent/dashboard';
+    if (role === 'SELLER') return '/seller/dashboard';
+    return '/dashboard';
+  };
+
+  const getProfilePath = (role) => {
+    if (role === 'ADMIN') return '/admin/dashboard';
+    if (role === 'AGENT') return '/agent/profile';
+    if (role === 'SELLER') return '/seller/profile';
+    return '/dashboard/profile';
+  };
+
+  const dashboardUrl = getDashboardPath(user?.role);
+  const profileUrl = getProfilePath(user?.role);
 
   // Track scroll for subtle navbar blur elevation
   useEffect(() => {
@@ -144,7 +162,17 @@ export default function Navbar() {
                     </div>
 
                     <Link
-                      to="/profile"
+                      to={dashboardUrl}
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition font-semibold"
+                    >
+                      <LayoutDashboard className="w-4 h-4 text-emerald-600" />
+                      <span>{user?.role === 'ADMIN' ? 'Admin Center' : 'Dashboard'}</span>
+                    </Link>
+
+                    <Link
+                      to={profileUrl}
+                      onClick={() => setUserDropdownOpen(false)}
                       className="flex items-center gap-2.5 px-4 py-2 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition"
                     >
                       <UserIcon className="w-4 h-4 text-emerald-600" />
@@ -153,6 +181,7 @@ export default function Navbar() {
 
                     <Link
                       to="/change-password"
+                      onClick={() => setUserDropdownOpen(false)}
                       className="flex items-center gap-2.5 px-4 py-2 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition"
                     >
                       <KeyRound className="w-4 h-4 text-amber-500" />
@@ -216,12 +245,13 @@ export default function Navbar() {
               <NavLink
                 key={link.path}
                 to={link.path}
+                onClick={() => setMobileMenuOpen(false)}
                 className={({ isActive }) =>
                   clsx(
-                    'px-4 py-2.5 rounded-xl text-sm font-semibold transition',
+                    'px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-150',
                     isActive
-                      ? 'text-emerald-700 bg-emerald-50'
-                      : 'text-slate-700 hover:bg-slate-50'
+                      ? 'text-emerald-700 bg-emerald-50 font-bold'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   )
                 }
               >
@@ -244,20 +274,32 @@ export default function Navbar() {
                 </div>
 
                 <Link
-                  to="/profile"
+                  to={dashboardUrl}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-4 py-2.5 text-sm font-bold text-emerald-700 rounded-xl hover:bg-emerald-50"
+                >
+                  {user?.role === 'ADMIN' ? 'Executive Dashboard' : 'My Dashboard'}
+                </Link>
+                <Link
+                  to={profileUrl}
+                  onClick={() => setMobileMenuOpen(false)}
                   className="block px-4 py-2.5 text-sm font-medium text-slate-700 rounded-xl hover:bg-slate-50"
                 >
                   My Profile
                 </Link>
                 <Link
                   to="/change-password"
+                  onClick={() => setMobileMenuOpen(false)}
                   className="block px-4 py-2.5 text-sm font-medium text-slate-700 rounded-xl hover:bg-slate-50"
                 >
                   Change Password
                 </Link>
                 <button
                   type="button"
-                  onClick={logout}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    logout();
+                  }}
                   className="w-full text-left px-4 py-2.5 text-sm font-semibold text-red-600 rounded-xl hover:bg-red-50"
                 >
                   Sign Out

@@ -1,7 +1,7 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 import RoleProtectedRoute from './routes/RoleProtectedRoute';
@@ -27,7 +27,6 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 
 // Shared User Settings
-import ProfilePage from './pages/shared/ProfilePage';
 import ChangePasswordPage from './pages/shared/ChangePasswordPage';
 
 // USER Dashboard Pages
@@ -38,6 +37,23 @@ import UserEnquiriesPage from './pages/dashboard/user/UserEnquiriesPage';
 import UserPropertiesPage from './pages/dashboard/user/UserPropertiesPage';
 import UserNotificationsPage from './pages/dashboard/user/UserNotificationsPage';
 import UserSettingsPage from './pages/dashboard/user/UserSettingsPage';
+
+// Smart Role Dispatchers
+function DashboardDispatcher() {
+  const { user } = useAuth();
+  if (user?.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
+  if (user?.role === 'AGENT') return <Navigate to="/agent/dashboard" replace />;
+  if (user?.role === 'SELLER') return <Navigate to="/seller/dashboard" replace />;
+  return <UserDashboard />;
+}
+
+function ProfileDispatcher() {
+  const { user } = useAuth();
+  if (user?.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
+  if (user?.role === 'AGENT') return <Navigate to="/agent/profile" replace />;
+  if (user?.role === 'SELLER') return <Navigate to="/seller/profile" replace />;
+  return <UserProfilePage />;
+}
 
 // AGENT Dashboard Pages
 import AgentDashboard from './pages/dashboard/agent/AgentDashboard';
@@ -56,31 +72,54 @@ import SellerPropertyEditPage from './pages/dashboard/seller/SellerPropertyEditP
 import SellerEnquiriesPage from './pages/dashboard/seller/SellerEnquiriesPage';
 import SellerProfilePage from './pages/dashboard/seller/SellerProfilePage';
 
-export default function App() {
+// ADMIN Dashboard Pages
+import AdminDashboard from './pages/dashboard/admin/AdminDashboard';
+import AdminUsersPage from './pages/dashboard/admin/AdminUsersPage';
+import AdminAgentsPage from './pages/dashboard/admin/AdminAgentsPage';
+import AdminSellersPage from './pages/dashboard/admin/AdminSellersPage';
+import AdminPropertiesPage from './pages/dashboard/admin/AdminPropertiesPage';
+import AdminPendingPropertiesPage from './pages/dashboard/admin/AdminPendingPropertiesPage';
+import AdminEnquiriesPage from './pages/dashboard/admin/AdminEnquiriesPage';
+import AdminReportsPage from './pages/dashboard/admin/AdminReportsPage';
+import AdminCategoriesPage from './pages/dashboard/admin/AdminCategoriesPage';
+import AdminLocationsPage from './pages/dashboard/admin/AdminLocationsPage';
+import AdminReviewsPage from './pages/dashboard/admin/AdminReviewsPage';
+import AdminAnalyticsPage from './pages/dashboard/admin/AdminAnalyticsPage';
+import AdminActivityLogsPage from './pages/dashboard/admin/AdminActivityLogsPage';
+import AdminSettingsPage from './pages/dashboard/admin/AdminSettingsPage';
+
+function AppContent() {
+  const location = useLocation();
+
+  // Hide the public marketing header & footer inside dedicated workspace dashboard suites
+  const isDashboardRoute =
+    location.pathname.startsWith('/dashboard') ||
+    location.pathname.startsWith('/agent') ||
+    location.pathname.startsWith('/seller') ||
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/change-password');
+
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <FavoritesProvider>
-          <div className="min-h-screen bg-slate-50 flex flex-col justify-between selection:bg-emerald-600 selection:text-white font-sans">
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                className: 'text-xs font-semibold rounded-2xl shadow-lg border border-slate-200',
-                duration: 3500,
-              }}
-            />
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-between selection:bg-emerald-600 selection:text-white font-sans">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          className: 'text-xs font-semibold rounded-2xl shadow-lg border border-slate-200',
+          duration: 3500,
+        }}
+      />
 
-            {/* Public Global Navigation */}
-            <Navbar />
+      {/* Render Public Global Navigation only outside dashboard suites */}
+      {!isDashboardRoute && <Navbar />}
 
-            {/* Application Routes */}
-            <main className="flex-1">
-              <Routes>
-                {/* Public Catalog Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/properties" element={<PropertiesPage />} />
-                <Route path="/properties/:slug" element={<PropertyDetailPage />} />
-                <Route path="/agents" element={<AgentsPage />} />
+      {/* Application Routes */}
+      <main className="flex-1">
+        <Routes>
+          {/* Public Catalog Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/properties" element={<PropertiesPage />} />
+          <Route path="/properties/:slug" element={<PropertyDetailPage />} />
+          <Route path="/agents" element={<AgentsPage />} />
                 <Route path="/agents/:id" element={<AgentDetailPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
@@ -100,14 +139,22 @@ export default function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <ProfileDispatcher />
+                    </ProtectedRoute>
+                  }
+                />
 
-                {/* USER Dashboard Routes */}
+                {/* Dashboard Root Dispatcher */}
                 <Route
                   path="/dashboard"
                   element={
-                    <RoleProtectedRoute allowedRoles={['USER', 'ADMIN', 'AGENT', 'SELLER']}>
-                      <UserDashboard />
-                    </RoleProtectedRoute>
+                    <ProtectedRoute>
+                      <DashboardDispatcher />
+                    </ProtectedRoute>
                   }
                 />
                 <Route
@@ -267,15 +314,138 @@ export default function App() {
                   }
                 />
 
+                {/* ADMIN Dashboard Routes (Strictly ADMIN only) */}
+                <Route
+                  path="/admin/dashboard"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminDashboard />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/users"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminUsersPage />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/agents"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminAgentsPage />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/sellers"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminSellersPage />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/properties"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminPropertiesPage />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/properties/pending"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminPendingPropertiesPage />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/enquiries"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminEnquiriesPage />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/reports"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminReportsPage />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/categories"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminCategoriesPage />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/locations"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminLocationsPage />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/reviews"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminReviewsPage />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/analytics"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminAnalyticsPage />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/activity-logs"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminActivityLogsPage />
+                    </RoleProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/settings"
+                  element={
+                    <RoleProtectedRoute allowedRoles={['ADMIN']}>
+                      <AdminSettingsPage />
+                    </RoleProtectedRoute>
+                  }
+                />
+
                 {/* 404 Route */}
                 <Route path="/404" element={<NotFoundPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
-            </main>
+      </main>
 
-            {/* Public Global Footer */}
-            <Footer />
-          </div>
+      {/* Render Public Global Footer only outside dashboard suites */}
+      {!isDashboardRoute && <Footer />}
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <FavoritesProvider>
+          <AppContent />
         </FavoritesProvider>
       </AuthProvider>
     </BrowserRouter>

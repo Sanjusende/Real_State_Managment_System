@@ -32,7 +32,16 @@ export default function Register() {
     const result = await register(formData);
     setIsSubmitting(false);
     if (result.success) {
-      navigate('/profile', { replace: true });
+      const role = result.user?.role || formData.role;
+      if (role === 'ADMIN') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (role === 'AGENT') {
+        navigate('/agent/dashboard', { replace: true });
+      } else if (role === 'SELLER') {
+        navigate('/seller/dashboard', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     }
   };
 

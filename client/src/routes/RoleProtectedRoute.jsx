@@ -24,6 +24,7 @@ export default function RoleProtectedRoute({ children, allowedRoles = [] }) {
     toast.error(`Access restricted: Unauthorized for ${user.role} role.`);
 
     // Redirect to the user's appropriate default dashboard
+    if (user.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
     if (user.role === 'AGENT') return <Navigate to="/agent/dashboard" replace />;
     if (user.role === 'SELLER') return <Navigate to="/seller/dashboard" replace />;
     return <Navigate to="/dashboard" replace />;
