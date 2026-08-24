@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -26,12 +26,26 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
+import { getUnreadCount } from '../../services/notificationService';
 import clsx from 'clsx';
 
 export default function DashboardSidebar({ onCloseMobile }) {
   const { user, logout } = useAuth();
   const { favoritesCount } = useFavorites();
+  const [unreadNotifs, setUnreadNotifs] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      getUnreadCount()
+        .then((res) => {
+          if (res?.data?.unreadCount !== undefined) {
+            setUnreadNotifs(res.data.unreadCount);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [user]);
 
   const role = user?.role || 'USER';
 
@@ -42,7 +56,7 @@ export default function DashboardSidebar({ onCloseMobile }) {
       { label: 'Saved Favorites', to: '/dashboard/favorites', icon: Heart, badge: favoritesCount || null },
       { label: 'My Inquiries', to: '/dashboard/enquiries', icon: MessageSquare },
       { label: 'Saved Searches', to: '/dashboard/properties', icon: Building2 },
-      { label: 'Notifications', to: '/dashboard/notifications', icon: Bell },
+      { label: 'Notifications', to: '/dashboard/notifications', icon: Bell, badge: unreadNotifs || null },
       { label: 'Profile', to: '/dashboard/profile', icon: User },
       { label: 'Account Settings', to: '/dashboard/settings', icon: Settings },
     ],

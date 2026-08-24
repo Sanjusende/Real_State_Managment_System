@@ -29,7 +29,7 @@ const reviewSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ['PENDING', 'APPROVED', 'REJECTED'],
-      default: 'PENDING',
+      default: 'APPROVED', // Direct publishing with post-moderation capability
       index: true,
     },
   },
@@ -38,7 +38,50 @@ const reviewSchema = new mongoose.Schema(
   }
 );
 
+// Prevent duplicate review for the same property by the same user
+reviewSchema.index({ property: 1, user: 1 }, { unique: true });
 reviewSchema.index({ property: 1, status: 1, createdAt: -1 });
+
+/**
+ * Static method to calculate review summary metrics for a property
+ */
+reviewSchema.statics.getReviewStats = async function (propertyId) {
+  const stats = await this.aggregate([
+    {
+      $match: {
+        property: new mongoose.Types.ObjectId(propertyId),
+        status: 'APPROVED',
+      },
+    },
+    {
+      $group: {
+        _id: '$rating',
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+
+  let totalReviews = 0;
+  let sumRatings = 0;
+  const ratingBreakdown = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+  stats.forEach((item) => {
+    const star = item._id;
+    if (star >= 1 && star <= 5) {
+      ratingBreakdown[star] = item.count;
+      totalReviews += item.count;
+      sumRatings += star * item.count;
+    }
+  });
+
+  const averageRating = totalReviews > 0 ? Number((sumRatings / totalReviews).toFixed(1)) : 0;
+
+  return {
+    averageRating,
+    totalReviews,
+    ratingBreakdown,
+  };
+};
 
 const Review = mongoose.model('Review', reviewSchema);
 

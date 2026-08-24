@@ -2,22 +2,19 @@ import mongoose from 'mongoose';
 
 const reportSchema = new mongoose.Schema(
   {
-    reporter: {
+    property: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Property',
+      required: [true, 'Property reference is required'],
+      index: true,
+      alias: 'targetId',
+    },
+    reportedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'Reporter reference is required'],
       index: true,
-    },
-    targetType: {
-      type: String,
-      enum: ['PROPERTY', 'USER', 'ENQUIRY', 'REVIEW'],
-      required: [true, 'Target entity type is required'],
-      index: true,
-    },
-    targetId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: [true, 'Target ID is required'],
-      index: true,
+      alias: 'reporter',
     },
     reason: {
       type: String,
@@ -32,6 +29,7 @@ const reportSchema = new mongoose.Schema(
         'OTHER',
       ],
       default: 'OTHER',
+      index: true,
     },
     description: {
       type: String,
@@ -41,9 +39,14 @@ const reportSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['PENDING', 'RESOLVED', 'DISMISSED'],
+      enum: ['PENDING', 'REVIEWING', 'RESOLVED', 'REJECTED', 'DISMISSED'],
       default: 'PENDING',
       index: true,
+    },
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
     },
     adminNotes: {
       type: String,
@@ -56,7 +59,8 @@ const reportSchema = new mongoose.Schema(
   }
 );
 
-reportSchema.index({ status: 1, createdAt: -1 });
+reportSchema.index({ property: 1, status: 1, createdAt: -1 });
+reportSchema.index({ reportedBy: 1, createdAt: -1 });
 
 const Report = mongoose.model('Report', reportSchema);
 

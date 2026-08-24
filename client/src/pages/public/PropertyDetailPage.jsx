@@ -22,9 +22,15 @@ import {
   ArrowLeft,
   Compass,
   Check,
+  Star,
+  Flag,
+  Trash2,
+  MessageSquare,
+  AlertTriangle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatPrice, formatArea, formatDate, formatStatus } from '../../utils/formatters';
+import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
 import { PropertyDetailSkeleton } from '../../components/common/LoadingSkeleton';
 import PropertyCard from '../../components/property/PropertyCard';
@@ -37,11 +43,18 @@ import {
   getProperties,
   sendPropertyEnquiry,
 } from '../../services/propertyService';
+import {
+  getPropertyReviews,
+  submitReview,
+  deleteReview,
+} from '../../services/reviewService';
+import { submitReport } from '../../services/reportService';
 import clsx from 'clsx';
 
 export default function PropertyDetailPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
 
   const [property, setProperty] = useState(null);
@@ -61,6 +74,42 @@ export default function PropertyDetailPage() {
   });
   const [submittingEnquiry, setSubmittingEnquiry] = useState(false);
 
+  // Reviews state
+  const [reviews, setReviews] = useState([]);
+  const [reviewStats, setReviewStats] = useState({
+    averageRating: 0,
+    totalReviews: 0,
+    ratingBreakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+  });
+  const [loadingReviews, setLoadingReviews] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  // Report listing state
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportForm, setReportForm] = useState({
+    reason: 'INCORRECT_INFORMATION',
+    description: '',
+  });
+  const [submittingReport, setSubmittingReport] = useState(false);
+
+  const loadReviews = async (propertyIdOrSlug) => {
+    setLoadingReviews(true);
+    try {
+      const res = await getPropertyReviews(propertyIdOrSlug);
+      if (res?.data) {
+        setReviews(res.data.reviews || []);
+        if (res.data.stats) {
+          setReviewStats(res.data.stats);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load reviews:', err);
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
+
   useEffect(() => {
     const fetchPropertyDetails = async () => {
       setLoading(true);
@@ -72,6 +121,7 @@ export default function PropertyDetailPage() {
           setProperty(propData);
           setActiveImageIndex(0);
           recordRecentlyViewed(propData);
+          loadReviews(propData._id || slug);
 
           // Set default enquiry message
           setEnquiryForm((prev) => ({
@@ -138,6 +188,72 @@ export default function PropertyDetailPage() {
     }
   };
 
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      toast.error('Please sign in to rate and review this property.');
+      navigate('/login');
+      return;
+    }
+
+    if (!reviewForm.comment.trim()) {
+      toast.error('Please write a short review comment.');
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      const res = await submitReview(property._id, reviewForm);
+      toast.success(res?.message || 'Review submitted successfully!');
+      setReviewForm({ rating: 5, comment: '' });
+      loadReviews(property._id);
+    } catch (err) {
+      toast.error(err.message || 'Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    try {
+      await deleteReview(reviewId);
+      toast.success('Your review has been removed.');
+      loadReviews(property._id);
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete review');
+    }
+  };
+
+  const handleReportSubmit = async (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      toast.error('Please sign in to report a listing issue.');
+      navigate('/login');
+      return;
+    }
+
+    if (!reportForm.description.trim()) {
+      toast.error('Please explain the issue.');
+      return;
+    }
+
+    setSubmittingReport(true);
+    try {
+      await submitReport({
+        propertyId: property._id,
+        reason: reportForm.reason,
+        description: reportForm.description,
+      });
+      toast.success('Report submitted. EstateCraft moderation will review this listing.');
+      setReportModalOpen(false);
+      setReportForm({ reason: 'INCORRECT_INFORMATION', description: '' });
+    } catch (err) {
+      toast.error(err.message || 'Failed to submit report');
+    } finally {
+      setSubmittingReport(false);
+    }
+  };
+
   if (loading) {
     return <PropertyDetailSkeleton />;
   }
@@ -178,6 +294,15 @@ export default function PropertyDetailPage() {
           </button>
 
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setReportModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:text-red-600 hover:border-red-200 hover:bg-red-50/50 transition cursor-pointer"
+              title="Report listing issues"
+            >
+              <Flag className="w-3.5 h-3.5 text-slate-400" />
+              <span>Report</span>
+            </button>
             <button
               type="button"
               onClick={handleShare}
@@ -464,6 +589,214 @@ export default function PropertyDetailPage() {
                 </div>
               </div>
             )}
+
+            {/* Ratings & Reviews Section */}
+            <div className="bg-white rounded-3xl border border-slate-200/80 p-6 md:p-8 shadow-sm space-y-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <Star className="w-5 h-5 text-amber-500 fill-current" />
+                    <span>Client Ratings & Reviews ({reviewStats.totalReviews})</span>
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Authentic feedback from verified buyers, tenants, and property visitors.
+                  </p>
+                </div>
+              </div>
+
+              {/* Rating Summary & Breakdown Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 rounded-2xl bg-slate-50 border border-slate-100 items-center">
+                {/* Score */}
+                <div className="text-center md:border-r border-slate-200/80 pr-4">
+                  <span className="text-4xl sm:text-5xl font-extrabold text-slate-900 block leading-tight">
+                    {reviewStats.averageRating > 0 ? reviewStats.averageRating : '—'}
+                  </span>
+                  <div className="flex items-center justify-center text-amber-500 my-1.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={clsx(
+                          'w-4 h-4',
+                          star <= Math.round(reviewStats.averageRating)
+                            ? 'fill-current text-amber-500'
+                            : 'text-slate-300'
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-xs text-slate-500">
+                    Based on {reviewStats.totalReviews} {reviewStats.totalReviews === 1 ? 'review' : 'reviews'}
+                  </span>
+                </div>
+
+                {/* Star Percentage Bars */}
+                <div className="md:col-span-2 space-y-2 text-xs">
+                  {[5, 4, 3, 2, 1].map((star) => {
+                    const count = reviewStats.ratingBreakdown?.[star] || 0;
+                    const percent =
+                      reviewStats.totalReviews > 0
+                        ? Math.round((count / reviewStats.totalReviews) * 100)
+                        : 0;
+                    return (
+                      <div key={star} className="flex items-center gap-3">
+                        <span className="w-12 font-bold text-slate-600 flex items-center gap-1">
+                          {star} <Star className="w-3 h-3 fill-current text-amber-500" />
+                        </span>
+                        <div className="flex-1 h-2 rounded-full bg-slate-200 overflow-hidden">
+                          <div
+                            className="h-full bg-amber-500 rounded-full transition-all duration-500"
+                            style={{ width: `${percent}%` }}
+                          />
+                        </div>
+                        <span className="w-12 text-right text-slate-400 font-semibold">{percent}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Add / Update Review Form */}
+              <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+                <h3 className="text-sm font-bold text-slate-900 mb-1">
+                  {isAuthenticated ? 'Leave Your Rating & Experience' : 'Sign In to Review This Property'}
+                </h3>
+                <p className="text-xs text-slate-500 mb-4">
+                  Rate your inspection experience, pricing transparency, or neighbourhood impressions.
+                </p>
+
+                {isAuthenticated ? (
+                  <form onSubmit={handleReviewSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                        Your Rating
+                      </label>
+                      <div className="flex items-center gap-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                            className="p-1 text-slate-300 hover:text-amber-400 transition cursor-pointer"
+                          >
+                            <Star
+                              className={clsx(
+                                'w-6 h-6 transition-transform hover:scale-110',
+                                star <= reviewForm.rating
+                                  ? 'text-amber-500 fill-current'
+                                  : 'text-slate-300'
+                              )}
+                            />
+                          </button>
+                        ))}
+                        <span className="text-xs font-bold text-slate-700 ml-2">
+                          {reviewForm.rating} of 5 Stars
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                        Review Comment
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={reviewForm.comment}
+                        onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                        placeholder="Describe your tour, locality advantages, building maintenance, or agent support..."
+                        className="w-full text-xs rounded-xl border border-slate-200 bg-white p-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500"
+                        required
+                      />
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button
+                        type="submit"
+                        variant="primary"
+                        size="sm"
+                        loading={submittingReview}
+                      >
+                        Submit Review
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate('/login')}
+                  >
+                    Sign In to Write a Review
+                  </Button>
+                )}
+              </div>
+
+              {/* Reviews List */}
+              <div className="space-y-4 pt-2">
+                {loadingReviews ? (
+                  <div className="space-y-3">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="h-20 bg-slate-50 rounded-2xl animate-pulse" />
+                    ))}
+                  </div>
+                ) : reviews.length === 0 ? (
+                  <div className="text-center py-8 text-slate-400 text-xs">
+                    No reviews yet for this listing. Be the first to leave feedback!
+                  </div>
+                ) : (
+                  reviews.map((rev) => (
+                    <div
+                      key={rev._id}
+                      className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2 hover:border-slate-200 transition"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
+                            {rev.user?.avatar ? (
+                              <img src={rev.user.avatar} alt="" className="w-full h-full object-cover rounded-full" />
+                            ) : (
+                              rev.user?.name?.charAt(0)?.toUpperCase() || 'U'
+                            )}
+                          </div>
+                          <div>
+                            <span className="font-bold text-slate-900 text-xs block">{rev.user?.name || 'Verified Buyer'}</span>
+                            <span className="text-[10px] text-slate-400 block">{formatDate(rev.createdAt)}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center text-amber-500">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={clsx(
+                                  'w-3.5 h-3.5',
+                                  star <= rev.rating ? 'fill-current text-amber-500' : 'text-slate-300'
+                                )}
+                              />
+                            ))}
+                          </div>
+
+                          {(user?._id === rev.user?._id || user?.role === 'ADMIN') && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteReview(rev._id)}
+                              className="p-1 text-slate-400 hover:text-red-600 rounded-lg transition cursor-pointer"
+                              title="Delete Review"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-slate-700 leading-relaxed pl-11">
+                        "{rev.comment}"
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Right Sidebar: Agent Contact & Direct Action */}
@@ -657,6 +990,69 @@ export default function PropertyDetailPage() {
               className="w-full"
             >
               Submit Inquiry
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Report Listing Modal */}
+      <Modal
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        title="Report Property Listing"
+        subtitle="Help EstateCraft maintain marketplace trust & safety"
+        maxWidth="max-w-md"
+      >
+        <form onSubmit={handleReportSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              Reason for Report
+            </label>
+            <select
+              value={reportForm.reason}
+              onChange={(e) => setReportForm({ ...reportForm, reason: e.target.value })}
+              className="w-full text-xs font-bold rounded-xl border border-slate-200 p-2.5 text-slate-900 cursor-pointer"
+            >
+              <option value="INCORRECT_INFORMATION">Incorrect Price, Area, or Photos</option>
+              <option value="FRAUD_OR_SCAM">Suspected Fraud or Scam</option>
+              <option value="SPAM_OR_DUPLICATE">Duplicate or Spam Listing</option>
+              <option value="OFFENSIVE_CONTENT">Inappropriate or Offensive Details</option>
+              <option value="UNRESPONSIVE_AGENT">Unresponsive Agent / Wrong Phone</option>
+              <option value="ALREADY_SOLD">Property is Already Sold / Rented</option>
+              <option value="OTHER">Other Issues</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+              Explanation & Details
+            </label>
+            <textarea
+              rows={4}
+              value={reportForm.description}
+              onChange={(e) => setReportForm({ ...reportForm, description: e.target.value })}
+              placeholder="Please provide specific details explaining the issue so our moderation team can investigate..."
+              className="w-full text-xs rounded-xl border border-slate-200 p-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-100 focus:border-red-500"
+              required
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setReportModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="danger"
+              size="sm"
+              loading={submittingReport}
+            >
+              Submit Report
             </Button>
           </div>
         </form>
