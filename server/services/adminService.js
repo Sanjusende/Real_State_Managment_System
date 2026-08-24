@@ -302,7 +302,8 @@ export const toggleUserBlock = async (id, adminUser) => {
     throw new ApiError(404, 'User not found');
   }
 
-  if (user._id.toString() === adminUser._id.toString()) {
+  const adminId = (adminUser?._id || adminUser?.id)?.toString();
+  if (adminId && user._id.toString() === adminId) {
     throw new ApiError(400, 'Administrators cannot block their own account.');
   }
 
@@ -319,7 +320,7 @@ export const toggleUserBlock = async (id, adminUser) => {
 
   await sendNotification({
     recipient: user._id,
-    sender: adminUser._id,
+    sender: adminUser?._id || adminUser?.id || null,
     type: 'ACCOUNT_STATUS_CHANGE',
     title: user.isBlocked ? 'Account Access Restricted' : 'Account Re-activated',
     message: user.isBlocked
@@ -336,7 +337,8 @@ export const deleteUser = async (id, adminUser) => {
     throw new ApiError(404, 'User not found');
   }
 
-  if (user._id.toString() === adminUser._id.toString()) {
+  const adminId = (adminUser?._id || adminUser?.id)?.toString();
+  if (adminId && user._id.toString() === adminId) {
     throw new ApiError(400, 'Administrators cannot delete their own account.');
   }
 
@@ -444,7 +446,7 @@ export const approveProperty = async (id, adminUser) => {
   if (targetRecipient) {
     await sendNotification({
       recipient: targetRecipient,
-      sender: adminUser._id,
+      sender: adminUser?._id || adminUser?.id || null,
       type: 'PROPERTY_APPROVED',
       title: 'Listing Approved! 🎉',
       message: `Your property listing "${property.title}" in ${property.city} has been verified and published to the public marketplace.`,
@@ -476,7 +478,7 @@ export const rejectProperty = async (id, reason = 'Listing does not satisfy qual
   if (targetRecipient) {
     await sendNotification({
       recipient: targetRecipient,
-      sender: adminUser._id,
+      sender: adminUser?._id || adminUser?.id || null,
       type: 'PROPERTY_REJECTED',
       title: 'Listing Update: Requires Revision',
       message: `Your property listing "${property.title}" was not approved. Feedback: ${reason}`,

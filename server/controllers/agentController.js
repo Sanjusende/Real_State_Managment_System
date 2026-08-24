@@ -58,12 +58,14 @@ export const getAgents = asyncHandler(async (req, res) => {
 
   const countMap = {};
   propertyCounts.forEach((p) => {
-    countMap[p._id.toString()] = p.count;
+    if (p && p._id) {
+      countMap[p._id.toString()] = p.count;
+    }
   });
 
   const enrichedAgents = agents.map((agent) => ({
     ...agent,
-    propertiesCount: countMap[agent._id.toString()] || 0,
+    propertiesCount: agent._id ? countMap[agent._id.toString()] || 0 : 0,
   }));
 
   const totalPages = Math.ceil(total / limitNum) || 0;

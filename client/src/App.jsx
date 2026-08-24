@@ -94,9 +94,12 @@ function AppContent() {
   // Hide the public marketing header & footer inside dedicated workspace dashboard suites
   const isDashboardRoute =
     location.pathname.startsWith('/dashboard') ||
-    location.pathname.startsWith('/agent') ||
-    location.pathname.startsWith('/seller') ||
-    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/agent/') ||
+    location.pathname === '/agent' ||
+    location.pathname.startsWith('/seller/') ||
+    location.pathname === '/seller' ||
+    location.pathname.startsWith('/admin/') ||
+    location.pathname === '/admin' ||
     location.pathname.startsWith('/change-password');
 
   return (

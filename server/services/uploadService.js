@@ -139,8 +139,12 @@ export const deletePropertyImage = async (propertyId, publicId, user) => {
   }
 
   // Ownership verification
-  const isOwner = property.owner.toString() === (user.id || user._id);
-  const isAgent = property.agent && property.agent.toString() === (user.id || user._id);
+  const currentUserId = (user?.id || user?._id)?.toString();
+  const ownerId = property.owner?._id?.toString() || property.owner?.toString();
+  const agentId = property.agent?._id?.toString() || property.agent?.toString();
+
+  const isOwner = Boolean(currentUserId && ownerId && ownerId === currentUserId);
+  const isAgent = Boolean(currentUserId && agentId && agentId === currentUserId);
   const isAdmin = user.role === ROLES.ADMIN;
 
   if (!isOwner && !isAgent && !isAdmin) {

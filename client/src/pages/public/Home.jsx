@@ -251,11 +251,22 @@ export default function Home() {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {categories.slice(0, 6).map((cat) => {
-              const typeSlug = cat.slug || cat.name?.toUpperCase();
+              const nameUpper = (cat.name || '').toUpperCase();
+              const slugUpper = (cat.slug || '').toUpperCase();
+              let pType = 'APARTMENT';
+              if (slugUpper === 'OFFICE' || nameUpper.includes('OFFICE')) pType = 'OFFICE';
+              else if (slugUpper === 'VILLA' || nameUpper.includes('VILLA')) pType = 'VILLA';
+              else if (slugUpper === 'COMMERCIAL' || nameUpper.includes('COMMERCIAL')) pType = 'COMMERCIAL';
+              else if (slugUpper === 'PLOT' || nameUpper.includes('PLOT')) pType = 'PLOT';
+              else if (slugUpper === 'PENTHOUSE' || nameUpper.includes('PENTHOUSE')) pType = 'PENTHOUSE';
+              else if (slugUpper === 'STUDIO' || nameUpper.includes('STUDIO')) pType = 'STUDIO';
+              else if (slugUpper === 'HOUSE' || nameUpper.includes('HOUSE')) pType = 'HOUSE';
+              else pType = slugUpper || nameUpper;
+
               return (
                 <Link
                   key={cat.name}
-                  to={`/properties?propertyType=${cat.name?.toUpperCase()}`}
+                  to={`/properties?propertyType=${pType}`}
                   className="group rounded-2xl bg-white border border-slate-200 p-5 text-center shadow-xs hover:border-emerald-500 hover:shadow-md transition-all duration-200 flex flex-col items-center justify-center"
                 >
                   <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl mb-3 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-200">
