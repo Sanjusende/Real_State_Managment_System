@@ -2,6 +2,7 @@ import { Router } from 'express';
 import authRoutes from './authRoutes.js';
 import propertyRoutes from './propertyRoutes.js';
 import agentRoutes from './agentRoutes.js';
+import enquiryRoutes from './enquiryRoutes.js';
 import categoryRoutes from './categoryRoutes.js';
 import locationRoutes from './locationRoutes.js';
 import testRoutes from './testRoutes.js';
@@ -14,6 +15,9 @@ router.use('/auth', authRoutes);
 
 // Property Management Module Routes
 router.use('/properties', propertyRoutes);
+
+// Enquiry Module Routes
+router.use('/enquiries', enquiryRoutes);
 
 // Agent Directory Module Routes
 router.use('/agents', agentRoutes);

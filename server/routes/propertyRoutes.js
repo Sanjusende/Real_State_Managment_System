@@ -10,6 +10,7 @@ import {
   updateStatus,
   updateApproval,
   toggleFeatured,
+  getDashboardAnalytics,
 } from '../controllers/propertyController.js';
 import { verifyToken, optionalAuth } from '../middlewares/authMiddleware.js';
 import { authorizeRoles } from '../middlewares/rbacMiddleware.js';
@@ -25,6 +26,9 @@ import { validatePropertyQuery } from '../validators/searchValidators.js';
 import { ROLES } from '../config/constants.js';
 
 const router = Router();
+
+// Analytics for Dashboard (AGENT, SELLER, ADMIN)
+router.get('/analytics', verifyToken, authorizeRoles(ROLES.AGENT, ROLES.SELLER, ROLES.ADMIN), getDashboardAnalytics);
 
 // Public / General Catalog Queries with Query Validation
 router.get('/', optionalAuth, validate(validatePropertyQuery, 'query'), getProperties);

@@ -51,3 +51,8 @@ export const toggleFeatured = asyncHandler(async (req, res) => {
   const property = await propertyService.togglePropertyFeatured(req.params.id, req.body.isFeatured, req.user);
   res.status(200).json(new ApiResponse(200, `Property featured status updated`, property));
 });
+
+export const getDashboardAnalytics = asyncHandler(async (req, res) => {
+  const analytics = await propertyService.getDashboardAnalytics(req.user);
+  res.status(200).json(new ApiResponse(200, 'Dashboard analytics retrieved successfully', analytics));
+});
