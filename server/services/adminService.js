@@ -882,7 +882,9 @@ export const getAllReports = async (queryParams = {}) => {
 
   const [reports, total] = await Promise.all([
     Report.find(filter)
-      .populate('reporter', 'name email')
+      .populate('reportedBy', 'name email phone avatar')
+      .populate('property', 'title slug thumbnail price priceUnit city state')
+      .populate('reviewedBy', 'name email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -905,8 +907,9 @@ export const updateReportStatus = async (id, status, adminNotes, adminUser) => {
     throw new ApiError(404, 'Report not found');
   }
 
-  report.status = status;
+  if (status) report.status = status.toUpperCase();
   if (adminNotes !== undefined) report.adminNotes = adminNotes;
+  report.reviewedBy = adminUser.id || adminUser._id;
   await report.save();
 
   await logActivity({
