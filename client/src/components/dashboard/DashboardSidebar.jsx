@@ -15,6 +15,14 @@ import {
   ShieldCheck,
   Briefcase,
   Store,
+  Users,
+  Clock,
+  Flag,
+  Star,
+  Tags,
+  MapPin,
+  Activity,
+  Sliders,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoritesContext';
@@ -54,11 +62,20 @@ export default function DashboardSidebar({ onCloseMobile }) {
       { label: 'Seller Profile', to: '/seller/profile', icon: User },
     ],
     ADMIN: [
-      { label: 'Overview', to: '/dashboard', icon: LayoutDashboard, end: true },
-      { label: 'Agent Hub', to: '/agent/dashboard', icon: Briefcase },
-      { label: 'Seller Hub', to: '/seller/dashboard', icon: Store },
-      { label: 'All Inquiries', to: '/agent/enquiries', icon: MessageSquare },
-      { label: 'Profile', to: '/dashboard/profile', icon: User },
+      { label: 'Admin Dashboard', to: '/admin/dashboard', icon: LayoutDashboard, end: true },
+      { label: 'User Directory', to: '/admin/users', icon: Users },
+      { label: 'Agent Partners', to: '/admin/agents', icon: Briefcase },
+      { label: 'Property Sellers', to: '/admin/sellers', icon: Store },
+      { label: 'Property Inventory', to: '/admin/properties', icon: Building2, end: true },
+      { label: 'Pending Approvals', to: '/admin/properties/pending', icon: Clock },
+      { label: 'System Enquiries', to: '/admin/enquiries', icon: MessageSquare },
+      { label: 'Client Reviews', to: '/admin/reviews', icon: Star },
+      { label: 'Flagged Reports', to: '/admin/reports', icon: Flag },
+      { label: 'Category Master', to: '/admin/categories', icon: Tags },
+      { label: 'Location Hub', to: '/admin/locations', icon: MapPin },
+      { label: 'Platform Analytics', to: '/admin/analytics', icon: BarChart3 },
+      { label: 'Audit Activity Logs', to: '/admin/activity-logs', icon: Activity },
+      { label: 'System Settings', to: '/admin/settings', icon: Sliders },
     ],
   };
 

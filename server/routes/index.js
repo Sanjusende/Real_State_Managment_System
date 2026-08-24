@@ -5,10 +5,14 @@ import agentRoutes from './agentRoutes.js';
 import enquiryRoutes from './enquiryRoutes.js';
 import categoryRoutes from './categoryRoutes.js';
 import locationRoutes from './locationRoutes.js';
+import adminRoutes from './adminRoutes.js';
 import testRoutes from './testRoutes.js';
 import rbacTestRoutes from './rbacTestRoutes.js';
 
 const router = Router();
+
+// Administrative Core Module Routes (Strict RBAC Protected)
+router.use('/admin', adminRoutes);
 
 // Authentication Module Routes
 router.use('/auth', authRoutes);

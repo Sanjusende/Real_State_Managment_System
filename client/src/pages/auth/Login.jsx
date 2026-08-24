@@ -11,7 +11,7 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/profile';
+  const rawFrom = location.state?.from?.pathname;
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -23,7 +23,21 @@ export default function Login() {
     const result = await login(formData.email, formData.password);
     setIsSubmitting(false);
     if (result.success) {
-      navigate(from, { replace: true });
+      if (rawFrom && !['/profile', '/login', '/404'].includes(rawFrom)) {
+        navigate(rawFrom, { replace: true });
+        return;
+      }
+
+      const role = result.user?.role;
+      if (role === 'ADMIN') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (role === 'AGENT') {
+        navigate('/agent/dashboard', { replace: true });
+      } else if (role === 'SELLER') {
+        navigate('/seller/dashboard', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     }
   };
 
