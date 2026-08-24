@@ -47,6 +47,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    avatarPublicId: {
+      type: String,
+      default: '',
+    },
     bio: {
       type: String,
       maxlength: [500, 'Bio cannot exceed 500 characters'],

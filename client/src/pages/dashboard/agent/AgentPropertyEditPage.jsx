@@ -6,6 +6,7 @@ import DashboardLayout from '../../../components/dashboard/DashboardLayout';
 import Button from '../../../components/common/Button';
 import FormInput from '../../../components/common/FormInput';
 import FormSelect from '../../../components/common/FormSelect';
+import ImageUploader from '../../../components/common/ImageUploader';
 import { getPropertyById } from '../../../services/propertyService';
 import { updateProperty } from '../../../services/dashboardService';
 
@@ -57,6 +58,7 @@ export default function AgentPropertyEditPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [images, setImages] = useState([]);
 
   const [form, setForm] = useState({
     title: '',
@@ -74,7 +76,6 @@ export default function AgentPropertyEditPage() {
     totalFloors: '5',
     furnishingStatus: 'SEMI_FURNISHED',
     constructionStatus: 'READY_TO_MOVE',
-    thumbnail: '',
     address: '',
     city: '',
     state: '',
@@ -105,13 +106,24 @@ export default function AgentPropertyEditPage() {
             totalFloors: p.totalFloors?.toString() || '1',
             furnishingStatus: p.furnishingStatus || 'UNFURNISHED',
             constructionStatus: p.constructionStatus || 'READY_TO_MOVE',
-            thumbnail: p.thumbnail || '',
             address: p.address || '',
             city: p.city || '',
             state: p.state || '',
             pincode: p.pincode || '',
             amenities: p.amenities || [],
           });
+
+          if (p.images && p.images.length > 0) {
+            setImages(p.images.map((img, idx) => ({
+              url: img.url || img,
+              publicId: img.publicId || '',
+              isThumbnail: img.isThumbnail || idx === 0,
+              alt: img.alt || '',
+              order: img.order !== undefined ? img.order : idx,
+            })));
+          } else if (p.thumbnail) {
+            setImages([{ url: p.thumbnail, isThumbnail: true, alt: 'Thumbnail', order: 0 }]);
+          }
         }
       } catch (err) {
         console.error('Failed to load property:', err);
@@ -144,6 +156,8 @@ export default function AgentPropertyEditPage() {
     e.preventDefault();
     setSubmitting(true);
     try {
+      const thumbnailImg = images.find((img) => img.isThumbnail) || images[0];
+
       const payload = {
         ...form,
         price: Number(form.price),
@@ -153,6 +167,8 @@ export default function AgentPropertyEditPage() {
         balconies: Number(form.balconies) || 0,
         floor: Number(form.floor) || 0,
         totalFloors: Number(form.totalFloors) || 1,
+        images: images.length > 0 ? images : undefined,
+        thumbnail: thumbnailImg?.url || form.thumbnail,
       };
 
       await updateProperty(id, payload);
@@ -367,17 +383,12 @@ export default function AgentPropertyEditPage() {
           </div>
         </div>
 
-        {/* Photo URL */}
+        {/* Photo Gallery & Cloudinary Upload */}
         <div className="bg-white rounded-3xl border border-slate-200/90 p-6 md:p-8 shadow-xs space-y-4">
           <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
-            Thumbnail Image URL
+            Property Photos & Gallery
           </h2>
-          <FormInput
-            label="Thumbnail Image URL"
-            name="thumbnail"
-            value={form.thumbnail}
-            onChange={handleChange}
-          />
+          <ImageUploader images={images} onChange={setImages} maxImages={10} />
         </div>
 
         {/* Action Buttons */}

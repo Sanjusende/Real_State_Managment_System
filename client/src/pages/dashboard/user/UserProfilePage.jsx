@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   User,
   Mail,
@@ -8,6 +8,8 @@ import {
   Save,
   KeyRound,
   Sparkles,
+  Camera,
+  Loader2,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -16,10 +18,13 @@ import DashboardLayout from '../../../components/dashboard/DashboardLayout';
 import Button from '../../../components/common/Button';
 import FormInput from '../../../components/common/FormInput';
 import * as authService from '../../../services/authService';
+import { uploadUserAvatar } from '../../../services/uploadService';
 
 export default function UserProfilePage() {
   const { user, updateUser } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
     name: user?.name || '',
@@ -30,6 +35,27 @@ export default function UserProfilePage() {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleAvatarFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+    try {
+      const res = await uploadUserAvatar(file);
+      if (res?.data?.avatar) {
+        setForm((prev) => ({ ...prev, avatar: res.data.avatar }));
+        updateUser({ ...user, avatar: res.data.avatar });
+        toast.success('Profile avatar updated successfully!');
+      }
+    } catch (err) {
+      console.error('Avatar upload failed:', err);
+      toast.error(err.message || 'Failed to upload avatar. Max 5MB allowed.');
+    } finally {
+      setUploadingAvatar(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const handleSave = async (e) => {
@@ -54,17 +80,44 @@ export default function UserProfilePage() {
       subtitle="Manage your contact details, personal bio, and view your verified account status."
     >
       <div className="max-w-4xl space-y-8">
+        {/* Hidden file input for avatar */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp"
+          onChange={handleAvatarFileChange}
+          className="hidden"
+        />
+
         {/* Profile Overview Card */}
         <div className="bg-white rounded-3xl border border-slate-200/90 p-6 md:p-8 shadow-xs">
           <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 pb-6 border-b border-slate-100">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
-              <div className="w-20 h-20 rounded-3xl bg-emerald-600 text-white flex items-center justify-center text-3xl font-extrabold shadow-lg shadow-emerald-600/20 overflow-hidden flex-shrink-0">
+              {/* Interactive Avatar Container */}
+              <div
+                onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
+                className="relative w-20 h-20 rounded-3xl bg-emerald-600 text-white flex items-center justify-center text-3xl font-extrabold shadow-lg shadow-emerald-600/20 overflow-hidden flex-shrink-0 group cursor-pointer"
+                title="Click to upload profile photo"
+              >
                 {form.avatar ? (
                   <img src={form.avatar} alt="" className="w-full h-full object-cover" />
                 ) : (
                   form.name?.charAt(0)?.toUpperCase() || 'U'
                 )}
+
+                {/* Upload Overlay */}
+                <div className="absolute inset-0 bg-slate-950/60 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                  {uploadingAvatar ? (
+                    <Loader2 className="w-6 h-6 animate-spin text-white" />
+                  ) : (
+                    <>
+                      <Camera className="w-5 h-5 mb-0.5" />
+                      <span className="text-[9px] font-bold">Change</span>
+                    </>
+                  )}
+                </div>
               </div>
+
               <div>
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
                   <h2 className="text-xl font-bold text-slate-900">{form.name || 'User'}</h2>
@@ -77,9 +130,15 @@ export default function UserProfilePage() {
                   <Mail className="w-3.5 h-3.5 text-slate-400" />
                   <span>{user?.email}</span>
                 </p>
-                <p className="text-[11px] text-slate-400 mt-1">
-                  Member since {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '2025'}
-                </p>
+                <div className="mt-1 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-[11px] font-bold text-emerald-700 hover:underline cursor-pointer"
+                  >
+                    Upload Avatar (JPEG, PNG, WebP)
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -110,14 +169,6 @@ export default function UserProfilePage() {
                 placeholder="+91 98765 43210"
               />
             </div>
-
-            <FormInput
-              label="Profile Avatar URL"
-              name="avatar"
-              value={form.avatar}
-              onChange={handleChange}
-              placeholder="https://images.unsplash.com/..."
-            />
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">

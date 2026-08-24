@@ -6,6 +6,7 @@ import DashboardLayout from '../../../components/dashboard/DashboardLayout';
 import Button from '../../../components/common/Button';
 import FormInput from '../../../components/common/FormInput';
 import FormSelect from '../../../components/common/FormSelect';
+import ImageUploader from '../../../components/common/ImageUploader';
 import { createProperty } from '../../../services/dashboardService';
 
 const PROPERTY_TYPES = [
@@ -24,6 +25,7 @@ const LISTING_TYPES = [
 export default function SellerPropertyCreatePage() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
+  const [images, setImages] = useState([]);
 
   const [form, setForm] = useState({
     title: '',
@@ -38,7 +40,6 @@ export default function SellerPropertyCreatePage() {
     city: 'Bhopal',
     state: 'Madhya Pradesh',
     pincode: '462016',
-    thumbnail: '',
     amenities: ['24/7 Security', 'Parking', 'Power Backup'],
   });
 
@@ -55,13 +56,16 @@ export default function SellerPropertyCreatePage() {
 
     setSubmitting(true);
     try {
+      const thumbnailImg = images.find((img) => img.isThumbnail) || images[0];
+
       const payload = {
         ...form,
         price: Number(form.price),
         area: Number(form.area),
         bedrooms: Number(form.bedrooms) || 0,
         bathrooms: Number(form.bathrooms) || 0,
-        thumbnail: form.thumbnail || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80',
+        images: images.length > 0 ? images : undefined,
+        thumbnail: thumbnailImg?.url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80',
       };
       await createProperty(payload);
       toast.success('Property published successfully!');
@@ -192,13 +196,12 @@ export default function SellerPropertyCreatePage() {
             />
           </div>
 
-          <FormInput
-            label="Photo URL"
-            name="thumbnail"
-            value={form.thumbnail}
-            onChange={handleChange}
-            placeholder="https://images.unsplash.com/..."
-          />
+          <div className="pt-2">
+            <label className="block text-xs font-semibold text-slate-700 mb-2">
+              Property Photos & Gallery
+            </label>
+            <ImageUploader images={images} onChange={setImages} maxImages={8} />
+          </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">

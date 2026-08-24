@@ -22,8 +22,17 @@ const propertyImageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    alt: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    order: {
+      type: Number,
+      default: 0,
+    },
   },
-  { _id: false }
+  { _id: true }
 );
 
 const propertySchema = new mongoose.Schema(
