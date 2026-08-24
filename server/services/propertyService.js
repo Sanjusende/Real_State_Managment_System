@@ -380,8 +380,12 @@ export const getPropertyById = async (id, user = null) => {
   }
 
   // Check access for unapproved listings
-  const isOwner = user && property.owner && property.owner._id.toString() === user.id;
-  const isAgent = user && property.agent && property.agent._id.toString() === user.id;
+  const currentUserId = (user?.id || user?._id)?.toString();
+  const ownerId = property.owner?._id?.toString() || property.owner?.toString();
+  const agentId = property.agent?._id?.toString() || property.agent?.toString();
+
+  const isOwner = Boolean(currentUserId && ownerId && ownerId === currentUserId);
+  const isAgent = Boolean(currentUserId && agentId && agentId === currentUserId);
   const isAdmin = user && user.role === ROLES.ADMIN;
 
   if (property.approvalStatus !== 'APPROVED' && !isOwner && !isAgent && !isAdmin) {
@@ -409,8 +413,12 @@ export const getPropertyBySlug = async (slug, user = null) => {
     throw new ApiError(404, 'Property not found');
   }
 
-  const isOwner = user && property.owner && property.owner._id.toString() === user.id;
-  const isAgent = user && property.agent && property.agent._id.toString() === user.id;
+  const currentUserId = (user?.id || user?._id)?.toString();
+  const ownerId = property.owner?._id?.toString() || property.owner?.toString();
+  const agentId = property.agent?._id?.toString() || property.agent?.toString();
+
+  const isOwner = Boolean(currentUserId && ownerId && ownerId === currentUserId);
+  const isAgent = Boolean(currentUserId && agentId && agentId === currentUserId);
   const isAdmin = user && user.role === ROLES.ADMIN;
 
   if (property.approvalStatus !== 'APPROVED' && !isOwner && !isAgent && !isAdmin) {
@@ -469,9 +477,13 @@ export const updateProperty = async (id, updateData, user) => {
   }
 
   // Verify ownership
-  const isOwner = property.owner.toString() === (user.id || user._id);
-  const isAgent = property.agent && property.agent.toString() === (user.id || user._id);
-  const isAdmin = user.role === ROLES.ADMIN;
+  const currentUserId = (user?.id || user?._id)?.toString();
+  const ownerId = property.owner?._id?.toString() || property.owner?.toString();
+  const agentId = property.agent?._id?.toString() || property.agent?.toString();
+
+  const isOwner = Boolean(currentUserId && ownerId && ownerId === currentUserId);
+  const isAgent = Boolean(currentUserId && agentId && agentId === currentUserId);
+  const isAdmin = user?.role === ROLES.ADMIN;
 
   if (!isOwner && !isAgent && !isAdmin) {
     throw new ApiError(403, 'Forbidden: You do not have permission to modify this listing');
@@ -513,9 +525,13 @@ export const deleteProperty = async (id, user) => {
     throw new ApiError(404, 'Property not found');
   }
 
-  const isOwner = property.owner.toString() === (user.id || user._id);
-  const isAgent = property.agent && property.agent.toString() === (user.id || user._id);
-  const isAdmin = user.role === ROLES.ADMIN;
+  const currentUserId = (user?.id || user?._id)?.toString();
+  const ownerId = property.owner?._id?.toString() || property.owner?.toString();
+  const agentId = property.agent?._id?.toString() || property.agent?.toString();
+
+  const isOwner = Boolean(currentUserId && ownerId && ownerId === currentUserId);
+  const isAgent = Boolean(currentUserId && agentId && agentId === currentUserId);
+  const isAdmin = user?.role === ROLES.ADMIN;
 
   if (!isOwner && !isAgent && !isAdmin) {
     throw new ApiError(403, 'Forbidden: You do not have permission to delete this listing');
@@ -534,9 +550,13 @@ export const updatePropertyStatus = async (id, status, user) => {
     throw new ApiError(404, 'Property not found');
   }
 
-  const isOwner = property.owner.toString() === (user.id || user._id);
-  const isAgent = property.agent && property.agent.toString() === (user.id || user._id);
-  const isAdmin = user.role === ROLES.ADMIN;
+  const currentUserId = (user?.id || user?._id)?.toString();
+  const ownerId = property.owner?._id?.toString() || property.owner?.toString();
+  const agentId = property.agent?._id?.toString() || property.agent?.toString();
+
+  const isOwner = Boolean(currentUserId && ownerId && ownerId === currentUserId);
+  const isAgent = Boolean(currentUserId && agentId && agentId === currentUserId);
+  const isAdmin = user?.role === ROLES.ADMIN;
 
   if (!isOwner && !isAgent && !isAdmin) {
     throw new ApiError(403, 'Forbidden: You do not have permission to update status for this listing');
