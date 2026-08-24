@@ -18,6 +18,30 @@ const ALLOWED_SORT_OPTIONS = [
   'featured',
 ];
 
+const PROPERTY_TYPE_ALIASES = {
+  'CORPORATE OFFICE': 'OFFICE',
+  'CORPORATE_OFFICE': 'OFFICE',
+  'OFFICES': 'OFFICE',
+  'LUXURY VILLA': 'VILLA',
+  'LUXURY_VILLA': 'VILLA',
+  'VILLAS': 'VILLA',
+  'COMMERCIAL HUB': 'COMMERCIAL',
+  'COMMERCIAL_HUB': 'COMMERCIAL',
+  'COMMERCIALS': 'COMMERCIAL',
+  'RESIDENTIAL PLOT': 'PLOT',
+  'RESIDENTIAL_PLOT': 'PLOT',
+  'PLOTS': 'PLOT',
+  'APARTMENTS': 'APARTMENT',
+  'PENTHOUSES': 'PENTHOUSE',
+  'STUDIOS': 'STUDIO',
+  'HOUSES': 'HOUSE',
+};
+
+export const normalizePropertyType = (type) => {
+  const upper = (type || '').trim().toUpperCase();
+  return PROPERTY_TYPE_ALIASES[upper] || upper;
+};
+
 /**
  * Validates query parameters for property search & filtering
  */
@@ -151,11 +175,11 @@ export const validatePropertyQuery = (query) => {
     });
   }
 
-  // 5. Property Type Validation (Single or Comma-separated)
+  // 5. Property Type Validation (Single or Comma-separated with alias support)
   if (query.propertyType !== undefined) {
     const types = query.propertyType
       .split(',')
-      .map((t) => t.trim().toUpperCase())
+      .map((t) => normalizePropertyType(t))
       .filter(Boolean);
 
     if (types.length === 0) {

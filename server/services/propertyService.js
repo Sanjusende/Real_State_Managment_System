@@ -193,9 +193,31 @@ export const getAllProperties = async (queryParams = {}, user = null) => {
 
   // 4. Property Types (Supports single value or comma-separated list e.g. 'Apartment,Villa')
   if (queryParams.propertyType) {
+    const PROPERTY_TYPE_ALIASES = {
+      'CORPORATE OFFICE': 'OFFICE',
+      'CORPORATE_OFFICE': 'OFFICE',
+      'OFFICES': 'OFFICE',
+      'LUXURY VILLA': 'VILLA',
+      'LUXURY_VILLA': 'VILLA',
+      'VILLAS': 'VILLA',
+      'COMMERCIAL HUB': 'COMMERCIAL',
+      'COMMERCIAL_HUB': 'COMMERCIAL',
+      'COMMERCIALS': 'COMMERCIAL',
+      'RESIDENTIAL PLOT': 'PLOT',
+      'RESIDENTIAL_PLOT': 'PLOT',
+      'PLOTS': 'PLOT',
+      'APARTMENTS': 'APARTMENT',
+      'PENTHOUSES': 'PENTHOUSE',
+      'STUDIOS': 'STUDIO',
+      'HOUSES': 'HOUSE',
+    };
+
     const types = queryParams.propertyType
       .split(',')
-      .map((t) => t.trim().toUpperCase())
+      .map((t) => {
+        const upper = t.trim().toUpperCase();
+        return PROPERTY_TYPE_ALIASES[upper] || upper;
+      })
       .filter(Boolean);
 
     if (types.length === 1) {
