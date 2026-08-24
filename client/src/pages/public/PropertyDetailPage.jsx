@@ -31,6 +31,7 @@ import PropertyCard from '../../components/property/PropertyCard';
 import Button from '../../components/common/Button';
 import FormInput from '../../components/common/FormInput';
 import Modal from '../../components/common/Modal';
+import { recordRecentlyViewed } from '../../utils/recentViews';
 import {
   getPropertyBySlug,
   getProperties,
@@ -70,6 +71,7 @@ export default function PropertyDetailPage() {
           const propData = res.data;
           setProperty(propData);
           setActiveImageIndex(0);
+          recordRecentlyViewed(propData);
 
           // Set default enquiry message
           setEnquiryForm((prev) => ({

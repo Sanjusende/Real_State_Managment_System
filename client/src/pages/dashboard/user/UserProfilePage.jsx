@@ -1,0 +1,152 @@
+import React, { useState } from 'react';
+import {
+  User,
+  Mail,
+  Phone,
+  ShieldCheck,
+  Calendar,
+  Save,
+  KeyRound,
+  Sparkles,
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useAuth } from '../../../context/AuthContext';
+import DashboardLayout from '../../../components/dashboard/DashboardLayout';
+import Button from '../../../components/common/Button';
+import FormInput from '../../../components/common/FormInput';
+import * as authService from '../../../services/authService';
+
+export default function UserProfilePage() {
+  const { user, updateUser } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+
+  const [form, setForm] = useState({
+    name: user?.name || '',
+    phone: user?.phone || '',
+    bio: user?.bio || '',
+    avatar: user?.avatar || '',
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const res = await authService.updateProfile(form);
+      if (res?.data?.user) {
+        updateUser(res.data.user);
+      }
+      toast.success('Profile information updated successfully!');
+    } catch (err) {
+      toast.error(err.message || 'Failed to update profile.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <DashboardLayout
+      title="My Personal Profile"
+      subtitle="Manage your contact details, personal bio, and view your verified account status."
+    >
+      <div className="max-w-4xl space-y-8">
+        {/* Profile Overview Card */}
+        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 md:p-8 shadow-xs">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 pb-6 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+              <div className="w-20 h-20 rounded-3xl bg-emerald-600 text-white flex items-center justify-center text-3xl font-extrabold shadow-lg shadow-emerald-600/20 overflow-hidden flex-shrink-0">
+                {form.avatar ? (
+                  <img src={form.avatar} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  form.name?.charAt(0)?.toUpperCase() || 'U'
+                )}
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
+                  <h2 className="text-xl font-bold text-slate-900">{form.name || 'User'}</h2>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                    {user?.role || 'USER'} Account
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 flex items-center justify-center sm:justify-start gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-slate-400" />
+                  <span>{user?.email}</span>
+                </p>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Member since {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '2025'}
+                </p>
+              </div>
+            </div>
+
+            <Link to="/change-password">
+              <Button variant="outline" size="sm" icon={KeyRound}>
+                Change Password
+              </Button>
+            </Link>
+          </div>
+
+          {/* Edit Form */}
+          <form onSubmit={handleSave} className="space-y-6 pt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormInput
+                label="Full Name"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                required
+              />
+
+              <FormInput
+                label="Phone Number"
+                name="phone"
+                type="tel"
+                value={form.phone}
+                onChange={handleChange}
+                placeholder="+91 98765 43210"
+              />
+            </div>
+
+            <FormInput
+              label="Profile Avatar URL"
+              name="avatar"
+              value={form.avatar}
+              onChange={handleChange}
+              placeholder="https://images.unsplash.com/..."
+            />
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                About / Property Preferences
+              </label>
+              <textarea
+                name="bio"
+                rows={3}
+                value={form.bio}
+                onChange={handleChange}
+                placeholder="Tell agents about your preferred locations, budget range, or property interests..."
+                className="w-full text-xs rounded-xl border border-slate-200 p-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500"
+              />
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <Button
+                type="submit"
+                variant="primary"
+                size="md"
+                icon={Save}
+                loading={submitting}
+              >
+                Save Profile Changes
+              </Button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
