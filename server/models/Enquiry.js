@@ -42,7 +42,7 @@ const enquirySchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['PENDING', 'CONTACTED', 'RESOLVED', 'CLOSED'],
+      enum: ['PENDING', 'CONTACTED', 'RESPONDED', 'RESOLVED', 'CLOSED'],
       default: 'PENDING',
     },
     notes: {
