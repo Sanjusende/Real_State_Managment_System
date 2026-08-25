@@ -25,4 +25,16 @@ export const authLimiter = rateLimit({
   },
 });
 
+export const contactLimiter = rateLimit({
+  windowMs: ENV.RATE_LIMIT.WINDOW_MS,
+  max: ENV.RATE_LIMIT.CONTACT_MAX_REQUESTS || 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    statusCode: 429,
+    message: 'Too many contact enquiries submitted from this IP. Please try again after 15 minutes.',
+  },
+});
+
 export default globalLimiter;
