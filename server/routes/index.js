@@ -6,6 +6,7 @@ import enquiryRoutes from './enquiryRoutes.js';
 import categoryRoutes from './categoryRoutes.js';
 import locationRoutes from './locationRoutes.js';
 import adminRoutes from './adminRoutes.js';
+import contactRoutes from './contactRoutes.js';
 import notificationRoutes from './notificationRoutes.js';
 import reviewRoutes from './reviewRoutes.js';
 import reportRoutes from './reportRoutes.js';
@@ -27,8 +28,11 @@ router.use('/properties', propertyRoutes);
 // Media & Asset Upload Routes (Multer + Cloudinary)
 router.use('/upload', uploadRoutes);
 
-// Enquiry Module Routes
+// Enquiry Module Routes (Property-specific enquiries)
 router.use('/enquiries', enquiryRoutes);
+
+// Contact Us Module Routes (General platform enquiries)
+router.use('/contact', contactRoutes);
 
 // Notification System Module Routes
 router.use('/notifications', notificationRoutes);

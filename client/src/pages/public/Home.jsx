@@ -543,7 +543,7 @@ export default function Home() {
                 onClick={() => navigate('/agents')}
                 variant="outline"
                 size="lg"
-                className="border-white/30 text-white hover:bg-white/10"
+                className="border-white/30 text-black hover:bg-white/10 hover:text-white"
               >
                 Find an Agent
               </Button>

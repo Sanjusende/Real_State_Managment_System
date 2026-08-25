@@ -8,10 +8,12 @@ import {
   HelpCircle,
   ChevronDown,
   Sparkles,
+  CheckCircle2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../../components/common/Button';
 import FormInput from '../../components/common/FormInput';
+import { submitContact } from '../../services/contactService';
 import clsx from 'clsx';
 
 const FAQS = [
@@ -40,23 +42,73 @@ export default function ContactPage() {
     phone: '',
     subject: '',
     message: '',
+    website: '', // Honeypot spam trap
   });
+  const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [openFaq, setOpenFaq] = useState(0);
 
-  const handleSubmit = (e) => {
+  const validateClientForm = () => {
+    const newErrors = {};
+    if (!form.name || form.name.trim().length < 2) {
+      newErrors.name = 'Please provide a valid name (at least 2 characters).';
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!form.email || !emailRegex.test(form.email.trim())) {
+      newErrors.email = 'Please provide a valid email address.';
+    }
+    const phoneRegex = /^\+?[0-9\s\-().]{7,20}$/;
+    if (!form.phone || !phoneRegex.test(form.phone.trim())) {
+      newErrors.phone = 'Please provide a valid phone number with country code.';
+    }
+    if (!form.subject || form.subject.trim().length < 3) {
+      newErrors.subject = 'Subject must be at least 3 characters.';
+    }
+    if (!form.message || form.message.trim().length < 10) {
+      newErrors.message = 'Message must be at least 10 characters.';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.message) {
-      toast.error('Please fill in all required fields.');
+    if (!validateClientForm()) {
+      toast.error('Please fix the validation errors below.');
       return;
     }
 
     setSubmitting(true);
-    setTimeout(() => {
-      toast.success('Thank you! Your message has been received. Our team will contact you within 24 hours.');
-      setForm({ name: '', email: '', phone: '', subject: '', message: '' });
+    setErrors({});
+
+    try {
+      const payload = {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        subject: form.subject.trim(),
+        message: form.message.trim(),
+        website: form.website, // Honeypot
+      };
+
+      const response = await submitContact(payload);
+      toast.success(response?.message || 'Your message has been sent successfully. Our team will contact you shortly.');
+      setForm({ name: '', email: '', phone: '', subject: '', message: '', website: '' });
+      setSubmitted(true);
+    } catch (err) {
+      const errorMsg = err?.message || 'Unable to submit your enquiry. Please try again later.';
+      toast.error(errorMsg);
+      if (err?.errors && Array.isArray(err.errors)) {
+        const fieldErrors = {};
+        err.errors.forEach((e) => {
+          if (e.field) fieldErrors[e.field] = e.message;
+        });
+        setErrors(fieldErrors);
+      }
+    } finally {
       setSubmitting(false);
-    }, 800);
+    }
   };
 
   return (
@@ -131,14 +183,48 @@ export default function ContactPage() {
           <div className="lg:col-span-2 bg-white rounded-3xl p-8 md:p-10 border border-slate-200/90 shadow-sm">
             <h2 className="text-xl font-bold text-slate-900 mb-6">Send Us a Direct Message</h2>
 
+            {submitted && (
+              <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-emerald-900">
+                  <span className="font-bold block">Thank you! Your message has been sent.</span>
+                  Our advisory team has received your enquiry and will contact you shortly.
+                  <button
+                    type="button"
+                    onClick={() => setSubmitted(false)}
+                    className="block mt-2 text-xs font-bold text-emerald-700 underline hover:text-emerald-800 cursor-pointer"
+                  >
+                    Send another enquiry
+                  </button>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Honeypot field for spam prevention - hidden from humans */}
+              <div className="hidden" aria-hidden="true">
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={form.website}
+                  onChange={(e) => setForm({ ...form, website: e.target.value })}
+                />
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormInput
                   label="Your Name"
                   name="name"
                   value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, name: e.target.value });
+                    if (errors.name) setErrors({ ...errors, name: '' });
+                  }}
+                  error={errors.name}
                   placeholder="Rahul Verma"
+                  disabled={submitting}
                   required
                 />
 
@@ -147,8 +233,13 @@ export default function ContactPage() {
                   name="email"
                   type="email"
                   value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, email: e.target.value });
+                    if (errors.email) setErrors({ ...errors, email: '' });
+                  }}
+                  error={errors.email}
                   placeholder="rahul@example.com"
+                  disabled={submitting}
                   required
                 />
               </div>
@@ -159,16 +250,28 @@ export default function ContactPage() {
                   name="phone"
                   type="tel"
                   value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, phone: e.target.value });
+                    if (errors.phone) setErrors({ ...errors, phone: '' });
+                  }}
+                  error={errors.phone}
                   placeholder="+91 99887 76655"
+                  disabled={submitting}
+                  required
                 />
 
                 <FormInput
                   label="Subject"
                   name="subject"
                   value={form.subject}
-                  onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, subject: e.target.value });
+                    if (errors.subject) setErrors({ ...errors, subject: '' });
+                  }}
+                  error={errors.subject}
                   placeholder="Property Inquiry or Partnership"
+                  disabled={submitting}
+                  required
                 />
               </div>
 
@@ -179,11 +282,23 @@ export default function ContactPage() {
                 <textarea
                   rows={4}
                   value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  onChange={(e) => {
+                    setForm({ ...form, message: e.target.value });
+                    if (errors.message) setErrors({ ...errors, message: '' });
+                  }}
+                  disabled={submitting}
                   placeholder="Tell us about the property you are seeking, selling, or asking about..."
                   required
-                  className="w-full rounded-xl border border-slate-200 p-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500"
+                  className={clsx(
+                    "w-full rounded-xl border p-3 text-sm text-slate-900 focus:outline-none transition-colors disabled:bg-slate-50 disabled:text-slate-500",
+                    errors.message
+                      ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200"
+                      : "border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                  )}
                 />
+                {errors.message && (
+                  <p className="mt-1 text-xs text-red-600">{errors.message}</p>
+                )}
               </div>
 
               <div>
@@ -193,8 +308,9 @@ export default function ContactPage() {
                   size="md"
                   icon={Send}
                   loading={submitting}
+                  disabled={submitting}
                 >
-                  Submit Message
+                  {submitting ? 'Submitting Enquiry...' : 'Submit Message'}
                 </Button>
               </div>
             </form>
