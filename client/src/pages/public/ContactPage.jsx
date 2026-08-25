@@ -152,7 +152,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <span className="font-bold text-slate-900 block mb-0.5">Helpline</span>
-                    <span>+91 98765 43210 (Toll Free)</span>
+                    <span>+91 8815926552(Toll Free)</span>
                   </div>
                 </div>
 

@@ -42,12 +42,13 @@ export const ENV = {
     FROM_EMAIL: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || 'no-reply@estatecraft.com',
   },
 
-  // WhatsApp Business Cloud API Configuration
+  // WhatsApp (Meta Cloud API & CallMeBot Free Gateway)
   WHATSAPP: {
     ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN || '',
     PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
     ADMIN_NUMBER: process.env.WHATSAPP_ADMIN_NUMBER || '',
     API_VERSION: process.env.WHATSAPP_API_VERSION || 'v21.0',
+    CALLMEBOT_API_KEY: process.env.CALLMEBOT_API_KEY || '',
   },
 
   // Contact Settings
