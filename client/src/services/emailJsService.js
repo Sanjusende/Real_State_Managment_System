@@ -17,9 +17,15 @@ export const sendEmailViaEmailJS = async (data) => {
   }
 
   const templateParams = {
+    name: data.name,
     from_name: data.name,
+    user_name: data.name,
+    email: data.email,
     from_email: data.email,
+    user_email: data.email,
+    reply_to: data.email,
     phone: data.phone,
+    user_phone: data.phone,
     subject: data.subject,
     message: data.message,
     to_name: 'EstateCraft Admin',
