@@ -9,12 +9,18 @@ import {
   ChevronDown,
   Sparkles,
   CheckCircle2,
+  MessageSquare,
+  ExternalLink,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../../components/common/Button';
 import FormInput from '../../components/common/FormInput';
 import { submitContact } from '../../services/contactService';
 import clsx from 'clsx';
+
+const ADMIN_PHONE = '+918815926552';
+const ADMIN_WHATSAPP_NUMBER = '918815926552';
+const ADMIN_SUPPORT_EMAIL = 'support@estatecraft.com';
 
 const FAQS = [
   {
@@ -47,6 +53,7 @@ export default function ContactPage() {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [lastSubmitted, setLastSubmitted] = useState(null);
   const [openFaq, setOpenFaq] = useState(0);
 
   const validateClientForm = () => {
@@ -72,6 +79,17 @@ export default function ContactPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const getFormattedWhatsAppUrl = (data = form) => {
+    const msg = `🚨 *New EstateCraft Enquiry*\n\n*Name:* ${data.name || 'Visitor'}\n*Email:* ${data.email || 'N/A'}\n*Phone:* ${data.phone || 'N/A'}\n*Subject:* ${data.subject || 'Property Enquiry'}\n\n*Message:*\n${data.message || 'Hello, I have an inquiry regarding EstateCraft properties.'}`;
+    return `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+  };
+
+  const getFormattedMailtoUrl = (data = form) => {
+    const subject = encodeURIComponent(`Enquiry: ${data.subject || 'Property Query'}`);
+    const body = encodeURIComponent(`Name: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\n\nMessage:\n${data.message}`);
+    return `mailto:${ADMIN_SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateClientForm()) {
@@ -94,6 +112,7 @@ export default function ContactPage() {
 
       const response = await submitContact(payload);
       toast.success(response?.message || 'Your message has been sent successfully. Our team will contact you shortly.');
+      setLastSubmitted({ ...payload });
       setForm({ name: '', email: '', phone: '', subject: '', message: '', website: '' });
       setSubmitted(true);
     } catch (err) {
@@ -176,6 +195,28 @@ export default function ContactPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Direct Instant Action Buttons in Sidebar */}
+              <div className="pt-4 border-t border-slate-100 space-y-2.5">
+                <a
+                  href={getFormattedWhatsAppUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Chat on WhatsApp (+91 8815926552)</span>
+                  <ExternalLink className="w-3 h-3 ml-auto opacity-75" />
+                </a>
+
+                <a
+                  href={`mailto:${ADMIN_SUPPORT_EMAIL}?subject=EstateCraft%20Enquiry`}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition"
+                >
+                  <Mail className="w-4 h-4 text-slate-500" />
+                  <span>Email: {ADMIN_SUPPORT_EMAIL}</span>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -184,19 +225,37 @@ export default function ContactPage() {
             <h2 className="text-xl font-bold text-slate-900 mb-6">Send Us a Direct Message</h2>
 
             {submitted && (
-              <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-emerald-900">
-                  <span className="font-bold block">Thank you! Your message has been sent.</span>
-                  Our advisory team has received your enquiry and will contact you shortly.
-                  <button
-                    type="button"
-                    onClick={() => setSubmitted(false)}
-                    className="block mt-2 text-xs font-bold text-emerald-700 underline hover:text-emerald-800 cursor-pointer"
-                  >
-                    Send another enquiry
-                  </button>
+              <div className="mb-6 p-5 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-3">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-emerald-900">
+                    <span className="font-bold block">Thank you! Your message has been saved.</span>
+                    Our advisory team has received your enquiry and will contact you shortly.
+                  </div>
                 </div>
+
+                {lastSubmitted && (
+                  <div className="pt-2 border-t border-emerald-200/60 flex flex-wrap items-center gap-3">
+                    <a
+                      href={getFormattedWhatsAppUrl(lastSubmitted)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition shadow-xs"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>Also Send on WhatsApp</span>
+                      <ExternalLink className="w-3 h-3 opacity-75" />
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={() => setSubmitted(false)}
+                      className="text-xs font-bold text-emerald-800 underline hover:text-emerald-950 cursor-pointer"
+                    >
+                      Send another enquiry
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -301,7 +360,7 @@ export default function ContactPage() {
                 )}
               </div>
 
-              <div>
+              <div className="flex flex-wrap items-center gap-3 pt-1">
                 <Button
                   type="submit"
                   variant="primary"
@@ -312,6 +371,24 @@ export default function ContactPage() {
                 >
                   {submitting ? 'Submitting Enquiry...' : 'Submit Message'}
                 </Button>
+
+                <a
+                  href={getFormattedWhatsAppUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-600/30 text-emerald-800 hover:bg-emerald-50 text-xs font-bold transition cursor-pointer"
+                >
+                  <MessageSquare className="w-4 h-4 text-emerald-600" />
+                  <span>Send via WhatsApp</span>
+                </a>
+
+                <a
+                  href={getFormattedMailtoUrl()}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition"
+                >
+                  <Mail className="w-4 h-4 text-slate-500" />
+                  <span>Open in Mail App</span>
+                </a>
               </div>
             </form>
           </div>
