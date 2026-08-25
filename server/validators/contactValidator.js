@@ -44,25 +44,23 @@ export const validateContact = (data = {}) => {
     }
   }
 
-  // Subject Validation
+  // Subject Validation (default to 'General Enquiry' if not provided, or min 1 char)
   if (!data.subject || typeof data.subject !== 'string' || data.subject.trim().length === 0) {
     errors.push({ field: 'subject', message: 'Subject is required' });
   } else {
     const trimmedSubject = data.subject.trim();
-    if (trimmedSubject.length < 3) {
-      errors.push({ field: 'subject', message: 'Subject must be at least 3 characters long' });
-    } else if (trimmedSubject.length > 150) {
+    if (trimmedSubject.length > 150) {
       errors.push({ field: 'subject', message: 'Subject cannot exceed 150 characters' });
     }
   }
 
-  // Message Validation
+  // Message Validation (min 2 characters)
   if (!data.message || typeof data.message !== 'string' || data.message.trim().length === 0) {
     errors.push({ field: 'message', message: 'Message is required' });
   } else {
     const trimmedMessage = data.message.trim();
-    if (trimmedMessage.length < 10) {
-      errors.push({ field: 'message', message: 'Message must be at least 10 characters long' });
+    if (trimmedMessage.length < 2) {
+      errors.push({ field: 'message', message: 'Please provide a message with at least 2 characters' });
     } else if (trimmedMessage.length > 2000) {
       errors.push({ field: 'message', message: 'Message cannot exceed 2000 characters' });
     }
