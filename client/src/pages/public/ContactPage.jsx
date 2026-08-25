@@ -100,19 +100,24 @@ export default function ContactPage() {
     setSubmitting(true);
     setErrors({});
 
-    try {
-      const payload = {
-        name: form.name.trim(),
-        email: form.email.trim(),
-        phone: form.phone.trim(),
-        subject: form.subject.trim(),
-        message: form.message.trim(),
-        website: form.website, // Honeypot
-      };
+    const payload = {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      phone: form.phone.trim(),
+      subject: form.subject.trim(),
+      message: form.message.trim(),
+      website: form.website, // Honeypot
+    };
 
-      const response = await submitContact(payload);
-      toast.success(response?.message || 'Your message has been sent successfully. Our team will contact you shortly.');
-      setLastSubmitted({ ...payload });
+    try {
+      // 1. Save to Database
+      await submitContact(payload);
+      
+      // 2. Open WhatsApp directly to admin with the message
+      const whatsappUrl = getFormattedWhatsAppUrl(payload);
+      window.open(whatsappUrl, '_blank');
+
+      toast.success('Your message has been sent successfully!');
       setForm({ name: '', email: '', phone: '', subject: '', message: '', website: '' });
       setSubmitted(true);
     } catch (err) {
@@ -195,28 +200,6 @@ export default function ContactPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Direct Instant Action Buttons in Sidebar */}
-              <div className="pt-4 border-t border-slate-100 space-y-2.5">
-                <a
-                  href={getFormattedWhatsAppUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Chat on WhatsApp (+91 8815926552)</span>
-                  <ExternalLink className="w-3 h-3 ml-auto opacity-75" />
-                </a>
-
-                <a
-                  href={`mailto:${ADMIN_SUPPORT_EMAIL}?subject=EstateCraft%20Enquiry`}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition"
-                >
-                  <Mail className="w-4 h-4 text-slate-500" />
-                  <span>Email: {ADMIN_SUPPORT_EMAIL}</span>
-                </a>
-              </div>
             </div>
           </div>
 
@@ -225,37 +208,19 @@ export default function ContactPage() {
             <h2 className="text-xl font-bold text-slate-900 mb-6">Send Us a Direct Message</h2>
 
             {submitted && (
-              <div className="mb-6 p-5 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-3">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-emerald-900">
-                    <span className="font-bold block">Thank you! Your message has been saved.</span>
-                    Our advisory team has received your enquiry and will contact you shortly.
-                  </div>
+              <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-emerald-900">
+                  <span className="font-bold block">Thank you! Your message has been sent.</span>
+                  Our advisory team has received your enquiry and will contact you shortly.
+                  <button
+                    type="button"
+                    onClick={() => setSubmitted(false)}
+                    className="block mt-2 text-xs font-bold text-emerald-700 underline hover:text-emerald-800 cursor-pointer"
+                  >
+                    Send another message
+                  </button>
                 </div>
-
-                {lastSubmitted && (
-                  <div className="pt-2 border-t border-emerald-200/60 flex flex-wrap items-center gap-3">
-                    <a
-                      href={getFormattedWhatsAppUrl(lastSubmitted)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition shadow-xs"
-                    >
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span>Also Send on WhatsApp</span>
-                      <ExternalLink className="w-3 h-3 opacity-75" />
-                    </a>
-
-                    <button
-                      type="button"
-                      onClick={() => setSubmitted(false)}
-                      className="text-xs font-bold text-emerald-800 underline hover:text-emerald-950 cursor-pointer"
-                    >
-                      Send another enquiry
-                    </button>
-                  </div>
-                )}
               </div>
             )}
 
@@ -360,7 +325,7 @@ export default function ContactPage() {
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 pt-1">
+              <div>
                 <Button
                   type="submit"
                   variant="primary"
@@ -369,26 +334,8 @@ export default function ContactPage() {
                   loading={submitting}
                   disabled={submitting}
                 >
-                  {submitting ? 'Submitting Enquiry...' : 'Submit Message'}
+                  {submitting ? 'Sending...' : 'Send Message'}
                 </Button>
-
-                <a
-                  href={getFormattedWhatsAppUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-600/30 text-emerald-800 hover:bg-emerald-50 text-xs font-bold transition cursor-pointer"
-                >
-                  <MessageSquare className="w-4 h-4 text-emerald-600" />
-                  <span>Send via WhatsApp</span>
-                </a>
-
-                <a
-                  href={getFormattedMailtoUrl()}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition"
-                >
-                  <Mail className="w-4 h-4 text-slate-500" />
-                  <span>Open in Mail App</span>
-                </a>
               </div>
             </form>
           </div>
