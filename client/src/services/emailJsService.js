@@ -11,7 +11,11 @@ export const sendEmailViaEmailJS = async (data) => {
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
   const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-  if (!serviceId || !templateId || !publicKey) {
+  const cleanServiceId = (serviceId || '').trim();
+  const cleanTemplateId = (templateId || '').trim();
+  const cleanPublicKey = (publicKey || '').trim();
+
+  if (!cleanServiceId || !cleanTemplateId || !cleanPublicKey) {
     console.log('[EmailJS] VITE_EMAILJS_SERVICE_ID, TEMPLATE_ID or PUBLIC_KEY not configured. Skipping EmailJS dispatch.');
     return { success: false, skipped: true, reason: 'EmailJS credentials not set' };
   }
@@ -33,7 +37,9 @@ export const sendEmailViaEmailJS = async (data) => {
   };
 
   try {
-    const result = await emailjs.send(serviceId, templateId, templateParams, publicKey);
+    const result = await emailjs.send(cleanServiceId, cleanTemplateId, templateParams, {
+      publicKey: cleanPublicKey,
+    });
     console.log('[EmailJS] Email sent successfully:', result.status, result.text);
     return { success: true, text: result.text };
   } catch (error) {
