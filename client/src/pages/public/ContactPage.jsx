@@ -16,6 +16,7 @@ import toast from 'react-hot-toast';
 import Button from '../../components/common/Button';
 import FormInput from '../../components/common/FormInput';
 import { submitContact } from '../../services/contactService';
+import { sendEmailViaEmailJS } from '../../services/emailJsService';
 import clsx from 'clsx';
 
 const ADMIN_PHONE = '+918815926552';
@@ -110,10 +111,15 @@ export default function ContactPage() {
     };
 
     try {
-      // 1. Save to Database
+      // 1. Save to MongoDB Database
       await submitContact(payload);
+
+      // 2. Dispatch Email via EmailJS (Frontend browser email service)
+      sendEmailViaEmailJS(payload).catch((err) => {
+        console.warn('[Contact EmailJS] Error:', err);
+      });
       
-      // 2. Open WhatsApp directly to admin with the message
+      // 3. Open WhatsApp directly to admin with the message
       const whatsappUrl = getFormattedWhatsAppUrl(payload);
       window.open(whatsappUrl, '_blank');
 
