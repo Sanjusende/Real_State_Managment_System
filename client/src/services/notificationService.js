@@ -5,26 +5,21 @@ import api from './api';
  */
 
 export const getUserNotifications = async (params = {}) => {
-  const response = await api.get('/notifications', { params });
-  return response.data;
+  return await api.get('/notifications', { params });
 };
 
 export const getUnreadCount = async () => {
-  const response = await api.get('/notifications/unread-count');
-  return response.data;
+  return await api.get('/notifications/unread-count');
 };
 
 export const markAsRead = async (id) => {
-  const response = await api.patch(`/notifications/${id}/read`);
-  return response.data;
+  return await api.patch(`/notifications/${id}/read`);
 };
 
 export const markAllAsRead = async () => {
-  const response = await api.patch('/notifications/mark-all-read');
-  return response.data;
+  return await api.patch('/notifications/mark-all-read');
 };
 
 export const deleteNotification = async (id) => {
-  const response = await api.delete(`/notifications/${id}`);
-  return response.data;
+  return await api.delete(`/notifications/${id}`);
 };

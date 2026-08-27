@@ -5,12 +5,15 @@ import {
   MapPin,
   Clock,
   Send,
-  HelpCircle,
   ChevronDown,
   Sparkles,
   CheckCircle2,
   MessageSquare,
+  ShieldCheck,
+  Building2,
   ExternalLink,
+  ArrowRight,
+  Headphones,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Button from '../../components/common/Button';
@@ -22,6 +25,15 @@ import clsx from 'clsx';
 const ADMIN_PHONE = '+918815926552';
 const ADMIN_WHATSAPP_NUMBER = '918815926552';
 const ADMIN_SUPPORT_EMAIL = 'support@estatecraft.com';
+
+const INQUIRY_TYPES = [
+  'Property Purchase',
+  'Rental & Lease',
+  'List / Sell Property',
+  'Agent Partnership',
+  'Legal Due Diligence',
+  'Other Inquiries',
+];
 
 const FAQS = [
   {
@@ -40,6 +52,10 @@ const FAQS = [
     q: 'Can I schedule physical site visits directly through the platform?',
     a: 'Yes. On every property page, you can use the "Send Inquiry / Book Visit" button to connect directly with the assigned licensed agent who will arrange physical inspections at your convenience.',
   },
+  {
+    q: 'How quickly will your advisory team respond to messages?',
+    a: 'Our certified real estate advisors typically respond within 15 to 30 minutes during business hours (9:00 AM - 7:30 PM IST).',
+  },
 ];
 
 export default function ContactPage() {
@@ -47,14 +63,13 @@ export default function ContactPage() {
     name: '',
     email: '',
     phone: '',
-    subject: '',
+    subject: 'Property Purchase',
     message: '',
     website: '', // Honeypot spam trap
   });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [lastSubmitted, setLastSubmitted] = useState(null);
   const [openFaq, setOpenFaq] = useState(0);
 
   const validateClientForm = () => {
@@ -85,12 +100,6 @@ export default function ContactPage() {
     return `https://wa.me/${ADMIN_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   };
 
-  const getFormattedMailtoUrl = (data = form) => {
-    const subject = encodeURIComponent(`Enquiry: ${data.subject || 'Property Query'}`);
-    const body = encodeURIComponent(`Name: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone}\n\nMessage:\n${data.message}`);
-    return `mailto:${ADMIN_SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateClientForm()) {
@@ -111,10 +120,7 @@ export default function ContactPage() {
     };
 
     try {
-      // 1. Save to MongoDB Database
       await submitContact(payload);
-
-      // 2. Dispatch Email via EmailJS
       const emailResult = await sendEmailViaEmailJS(payload);
       if (emailResult.skipped) {
         console.warn('[EmailJS] Keys not configured in client/.env, skipping EmailJS email.');
@@ -123,7 +129,7 @@ export default function ContactPage() {
       }
 
       toast.success('Your message has been sent successfully!');
-      setForm({ name: '', email: '', phone: '', subject: '', message: '', website: '' });
+      setForm({ name: '', email: '', phone: '', subject: 'Property Purchase', message: '', website: '' });
       setSubmitted(true);
     } catch (err) {
       const errorMsg = err?.message || 'Unable to submit your enquiry. Please try again later.';
@@ -141,87 +147,168 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 md:py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold uppercase tracking-wider mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>24/7 Client Support</span>
+    <div className="min-h-screen bg-[#f8fafc] pb-24">
+      {/* 1. Luxury Dark Hero Header */}
+      <div className="bg-[#0b1528] pt-32 pb-24 border-b border-white/10 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(255,90,60,0.2),rgba(255,255,255,0))] pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <div className="max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#ff5a3c]/15 text-[#ff5a3c] border border-[#ff5a3c]/30 text-xs font-extrabold uppercase tracking-wider mb-4 shadow-sm">
+              <Headphones className="w-3.5 h-3.5" />
+              <span>Dedicated Client Concierge</span>
+            </div>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+              Get in Touch with Our <span className="text-[#ff5a3c]">Real Estate Experts</span>
+            </h1>
+            <p className="text-xs sm:text-base text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed">
+              Whether you are looking to buy a luxury residence, lease a corporate space, or partner as an accredited agent, our team is ready to guide you.
+            </p>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight mb-3">
-            We're Here to Help You Move Forward
-          </h1>
-          <p className="text-sm text-slate-500">
-            Have questions about a property, verification process, or agent partnership? Get in touch with our expert team.
-          </p>
         </div>
+      </div>
 
-        {/* Contact Info Grid + Form Card */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-20 items-start">
-          {/* Info Side */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-sm space-y-6">
-              <h3 className="text-lg font-bold text-slate-900">Headquarters</h3>
+      {/* 2. Floating Contact Channels Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20 mb-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Helpline */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-md shadow-slate-900/5 flex flex-col justify-between hover:border-[#ff5a3c]/50 transition group">
+            <div>
+              <div className="w-12 h-12 rounded-2xl bg-[#ff5a3c]/10 text-[#ff5a3c] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Phone className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-900 mb-1">Direct Helpline</h3>
+              <p className="text-xs text-slate-500 mb-3">Speak directly with an advisory consultant</p>
+            </div>
+            <a
+              href={`tel:${ADMIN_PHONE}`}
+              className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#ff5a3c] hover:text-[#e04b30] transition"
+            >
+              <span>+91 8815926552</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
+
+          {/* Card 2: WhatsApp */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-md shadow-slate-900/5 flex flex-col justify-between hover:border-[#84cc16]/50 transition group">
+            <div>
+              <div className="w-12 h-12 rounded-2xl bg-[#84cc16]/15 text-[#65a30d] flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <MessageSquare className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-900 mb-1">WhatsApp Concierge</h3>
+              <p className="text-xs text-slate-500 mb-3">Instant chat & property brochure dispatch</p>
+            </div>
+            <a
+              href={getFormattedWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#65a30d] hover:underline transition"
+            >
+              <span>Chat on WhatsApp</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
+
+          {/* Card 3: Email Support */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-md shadow-slate-900/5 flex flex-col justify-between hover:border-[#ff5a3c]/50 transition group">
+            <div>
+              <div className="w-12 h-12 rounded-2xl bg-[#0b1528] text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Mail className="w-5 h-5 text-[#ff5a3c]" />
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-900 mb-1">Email Advisory</h3>
+              <p className="text-xs text-slate-500 mb-3">Detailed proposals & document verification</p>
+            </div>
+            <a
+              href={`mailto:${ADMIN_SUPPORT_EMAIL}`}
+              className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#ff5a3c] hover:text-[#e04b30] transition"
+            >
+              <span>support@estatecraft.com</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
+
+          {/* Card 4: Operating Hours */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-md shadow-slate-900/5 flex flex-col justify-between hover:border-[#ff5a3c]/50 transition group">
+            <div>
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-800 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Clock className="w-5 h-5 text-slate-700" />
+              </div>
+              <h3 className="text-sm font-extrabold text-slate-900 mb-1">Working Hours</h3>
+              <p className="text-xs text-slate-500 mb-1">Monday – Saturday</p>
+            </div>
+            <span className="text-xs font-bold text-slate-800">
+              9:00 AM – 7:30 PM (IST)
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Main Content: Contact Form + Headquarters Showcase */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-20">
+          {/* Left Side: Headquarters Details & Map (5 cols) */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="bg-white rounded-3xl p-7 md:p-8 border border-slate-200/90 shadow-md shadow-slate-900/5 space-y-6">
+              <div>
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#ff5a3c] block mb-1">
+                  Corporate Headquarters
+                </span>
+                <h3 className="text-xl font-extrabold text-slate-900">EstateCraft Realty Center</h3>
+              </div>
 
               <div className="space-y-4 text-xs text-slate-600">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <MapPin className="w-4 h-4" />
-                  </div>
+                <div className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                  <MapPin className="w-5 h-5 text-[#ff5a3c] flex-shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold text-slate-900 block mb-0.5">Main Office</span>
-                    <span>Level 4, Premier Real Estate Center, Commercial Hub, Arera Colony, Bhopal, MP 462016</span>
+                    <span className="font-bold text-slate-900 block mb-0.5">Main Office Address</span>
+                    <span className="leading-relaxed">Level 4, Premier Real Estate Center, Commercial Hub, Arera Colony, Bhopal, MP 462016</span>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Phone className="w-4 h-4" />
-                  </div>
+                <div className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                  <ShieldCheck className="w-5 h-5 text-[#84cc16] flex-shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold text-slate-900 block mb-0.5">Helpline</span>
-                    <span>+91 8815926552(Toll Free)</span>
+                    <span className="font-bold text-slate-900 block mb-0.5">Government RERA Compliance</span>
+                    <span className="leading-relaxed">Fully registered real estate enterprise operating under strict regional RERA compliance audits.</span>
                   </div>
                 </div>
+              </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Mail className="w-4 h-4" />
+              {/* Map Illustration / Visual Card */}
+              <div className="rounded-2xl overflow-hidden border border-slate-200 relative bg-[#0b1528] h-48 flex items-center justify-center text-center p-6 text-white group">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,90,60,0.15),transparent)]" />
+                <div className="relative z-10">
+                  <div className="w-10 h-10 rounded-full bg-[#ff5a3c] text-white flex items-center justify-center mx-auto mb-2 shadow-lg shadow-[#ff5a3c]/30 group-hover:scale-110 transition-transform">
+                    <Building2 className="w-5 h-5" />
                   </div>
-                  <div>
-                    <span className="font-bold text-slate-900 block mb-0.5">Email Support</span>
-                    <span>support@estatecraft.com</span>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Clock className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="font-bold text-slate-900 block mb-0.5">Office Hours</span>
-                    <span>Mon – Sat: 9:00 AM – 7:30 PM (IST)</span>
-                  </div>
+                  <span className="text-sm font-extrabold block">Bhopal Hub & Experience Center</span>
+                  <span className="text-[11px] text-slate-300 block mt-0.5">Physical Site Visits & Legal Consultations</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Form Side */}
-          <div className="lg:col-span-2 bg-white rounded-3xl p-8 md:p-10 border border-slate-200/90 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">Send Us a Direct Message</h2>
+          {/* Right Side: Interactive Inquiry Form (7 cols) */}
+          <div className="lg:col-span-7 bg-white rounded-3xl p-8 md:p-10 border border-slate-200/90 shadow-md shadow-slate-900/5">
+            <div className="mb-6">
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#ff5a3c] block mb-1">
+                Direct Inquiry Form
+              </span>
+              <h2 className="text-2xl font-extrabold text-slate-900">Send Us a Direct Message</h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Fill out the form below and an assigned specialist will connect with you.
+              </p>
+            </div>
 
             {submitted && (
-              <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-start gap-3">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-emerald-900">
+              <div className="mb-6 p-4 rounded-2xl bg-[#ff5a3c]/10 border border-[#ff5a3c]/30 flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-[#ff5a3c] flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-slate-900">
                   <span className="font-bold block">Thank you! Your message has been sent.</span>
                   Our advisory team has received your enquiry and will contact you shortly.
                   <button
                     type="button"
                     onClick={() => setSubmitted(false)}
-                    className="block mt-2 text-xs font-bold text-emerald-700 underline hover:text-emerald-800 cursor-pointer"
+                    className="block mt-2 text-xs font-bold text-[#ff5a3c] underline hover:text-[#e04b30] cursor-pointer"
                   >
                     Send another message
                   </button>
@@ -230,7 +317,6 @@ export default function ContactPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Honeypot field for spam prevention - hidden from humans */}
               <div className="hidden" aria-hidden="true">
                 <input
                   type="text"
@@ -242,9 +328,39 @@ export default function ContactPage() {
                 />
               </div>
 
+              {/* Inquiry Type Chips */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+                  What are you inquiring about?
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {INQUIRY_TYPES.map((type) => {
+                    const isSelected = form.subject === type;
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => {
+                          setForm({ ...form, subject: type });
+                          if (errors.subject) setErrors({ ...errors, subject: '' });
+                        }}
+                        className={clsx(
+                          'px-3.5 py-2 rounded-xl text-xs font-bold transition cursor-pointer border',
+                          isSelected
+                            ? 'bg-[#0b1528] text-white border-[#0b1528] shadow-xs'
+                            : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-white hover:text-slate-950'
+                        )}
+                      >
+                        {type}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormInput
-                  label="Your Name"
+                  label="Your Full Name"
                   name="name"
                   value={form.name}
                   onChange={(e) => {
@@ -290,7 +406,7 @@ export default function ContactPage() {
                 />
 
                 <FormInput
-                  label="Subject"
+                  label="Subject / Topic"
                   name="subject"
                   value={form.subject}
                   onChange={(e) => {
@@ -298,15 +414,15 @@ export default function ContactPage() {
                     if (errors.subject) setErrors({ ...errors, subject: '' });
                   }}
                   error={errors.subject}
-                  placeholder="Property Inquiry or Partnership"
+                  placeholder="Property Inquiry"
                   disabled={submitting}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  How can we help you? <span className="text-red-500">*</span>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  How can we assist you? <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   rows={4}
@@ -316,13 +432,13 @@ export default function ContactPage() {
                     if (errors.message) setErrors({ ...errors, message: '' });
                   }}
                   disabled={submitting}
-                  placeholder="Tell us about the property you are seeking, selling, or asking about..."
+                  placeholder="Tell us about the property category, preferred budget, location corridor, or specific questions..."
                   required
                   className={clsx(
-                    "w-full rounded-xl border p-3 text-sm text-slate-900 focus:outline-none transition-colors disabled:bg-slate-50 disabled:text-slate-500",
+                    "w-full rounded-2xl border p-3.5 text-xs sm:text-sm text-slate-900 focus:outline-none transition-colors disabled:bg-slate-50 disabled:text-slate-500",
                     errors.message
                       ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-                      : "border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                      : "border-slate-200 focus:border-[#ff5a3c] focus:ring-2 focus:ring-[#ff5a3c]/20"
                   )}
                 />
                 {errors.message && (
@@ -338,22 +454,26 @@ export default function ContactPage() {
                   icon={Send}
                   loading={submitting}
                   disabled={submitting}
+                  className="!rounded-2xl !py-3.5 font-bold shadow-lg shadow-[#ff5a3c]/30 text-sm"
                 >
-                  {submitting ? 'Sending...' : 'Send Message'}
+                  {submitting ? 'Sending Enquiry...' : 'Submit Message'}
                 </Button>
               </div>
             </form>
           </div>
         </div>
 
-        {/* FAQ Accordion Section */}
-        <div className="max-w-4xl mx-auto pt-10 border-t border-slate-200">
+        {/* 4. FAQ Accordion Section */}
+        <div className="max-w-4xl mx-auto pt-12 border-t border-slate-200">
           <div className="text-center mb-10">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#ff5a3c] block mb-1">
+              Have Questions?
+            </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
               Frequently Asked Questions
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Common questions from buyers, sellers, and agents using EstateCraft.
+              Quick answers about our due diligence, site visits, and agent partnerships.
             </p>
           </div>
 
@@ -363,18 +483,18 @@ export default function ContactPage() {
               return (
                 <div
                   key={index}
-                  className="rounded-2xl bg-white border border-slate-200 overflow-hidden"
+                  className="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-xs hover:border-slate-300 transition"
                 >
                   <button
                     type="button"
                     onClick={() => setOpenFaq(isOpen ? -1 : index)}
-                    className="w-full flex items-center justify-between p-5 text-left text-sm font-bold text-slate-900 hover:text-emerald-700 transition cursor-pointer"
+                    className="w-full flex items-center justify-between p-5 text-left text-sm font-bold text-slate-900 hover:text-[#ff5a3c] transition cursor-pointer"
                   >
                     <span>{faq.q}</span>
                     <ChevronDown
                       className={clsx(
                         'w-4 h-4 text-slate-400 transition-transform duration-200',
-                        isOpen && 'rotate-180 text-emerald-600'
+                        isOpen && 'rotate-180 text-[#ff5a3c]'
                       )}
                     />
                   </button>
@@ -392,3 +512,5 @@ export default function ContactPage() {
     </div>
   );
 }
+
+

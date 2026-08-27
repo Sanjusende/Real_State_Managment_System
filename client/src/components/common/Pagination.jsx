@@ -79,9 +79,9 @@ export default function Pagination({
               type="button"
               onClick={() => onPageChange(page)}
               className={clsx(
-                'min-w-[34px] h-[34px] rounded-xl font-semibold transition cursor-pointer flex items-center justify-center text-xs',
+                'min-w-[34px] h-[34px] rounded-xl font-bold transition cursor-pointer flex items-center justify-center text-xs',
                 isActive
-                  ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
+                  ? 'bg-[#ff5a3c] text-white shadow-md shadow-[#ff5a3c]/30'
                   : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300'
               )}
             >
@@ -104,3 +104,4 @@ export default function Pagination({
     </div>
   );
 }
+

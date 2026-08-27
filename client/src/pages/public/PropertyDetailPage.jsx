@@ -333,10 +333,10 @@ export default function PropertyDetailPage() {
             <div>
               {/* Badges */}
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-emerald-600 text-white shadow-xs">
+                <span className="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-[#ff5a3c] text-white shadow-xs">
                   For {property.listingType}
                 </span>
-                <span className="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-slate-900 text-white shadow-xs">
+                <span className="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-[#0b1528] text-white shadow-xs">
                   {property.propertyType}
                 </span>
                 {property.isFeatured && (
@@ -345,7 +345,7 @@ export default function PropertyDetailPage() {
                   </span>
                 )}
                 {property.isVerified && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold uppercase bg-emerald-500 text-white">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold uppercase bg-[#0b1528] text-[#84cc16]">
                     <ShieldCheck className="w-3.5 h-3.5" /> Verified Listing
                   </span>
                 )}
@@ -358,7 +358,7 @@ export default function PropertyDetailPage() {
 
               {/* Location */}
               <p className="flex items-center gap-1.5 text-sm text-slate-500">
-                <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                <MapPin className="w-4 h-4 text-[#ff5a3c] flex-shrink-0" />
                 <span>
                   {property.address ? `${property.address}, ` : ''}
                   {property.city}, {property.state} {property.pincode ? `- ${property.pincode}` : ''}
@@ -367,8 +367,8 @@ export default function PropertyDetailPage() {
             </div>
 
             {/* Price Box */}
-            <div className="lg:text-right flex-shrink-0 bg-emerald-50/60 border border-emerald-100 p-5 rounded-2xl">
-              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider block mb-1">
+            <div className="lg:text-right flex-shrink-0 bg-[#ff5a3c]/10 border border-[#ff5a3c]/20 p-5 rounded-2xl">
+              <span className="text-xs font-bold text-[#ff5a3c] uppercase tracking-wider block mb-1">
                 {property.listingType === 'RENT' ? 'Rental Price' : 'Asking Price'}
               </span>
               <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 block">
@@ -426,7 +426,7 @@ export default function PropertyDetailPage() {
               <button
                 type="button"
                 onClick={() => setGalleryModalOpen(true)}
-                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-[#ff5a3c] hover:bg-[#e04b30] text-white text-xs font-bold shadow-md transition cursor-pointer"
               >
                 View Full Gallery
               </button>
@@ -444,7 +444,7 @@ export default function PropertyDetailPage() {
                   className={clsx(
                     'w-20 h-16 rounded-xl overflow-hidden border-2 flex-shrink-0 transition cursor-pointer',
                     activeImageIndex === idx
-                      ? 'border-emerald-600 scale-105 shadow-sm'
+                      ? 'border-[#ff5a3c] scale-105 shadow-sm'
                       : 'border-transparent opacity-70 hover:opacity-100'
                   )}
                 >
@@ -465,7 +465,7 @@ export default function PropertyDetailPage() {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-[#ff5a3c]/10 text-[#ff5a3c] flex items-center justify-center">
                     <Bed className="w-5 h-5" />
                   </div>
                   <div>
@@ -477,7 +477,7 @@ export default function PropertyDetailPage() {
                 </div>
 
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-[#ff5a3c]/10 text-[#ff5a3c] flex items-center justify-center">
                     <Bath className="w-5 h-5" />
                   </div>
                   <div>
@@ -489,7 +489,7 @@ export default function PropertyDetailPage() {
                 </div>
 
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-[#ff5a3c]/10 text-[#ff5a3c] flex items-center justify-center">
                     <Maximize2 className="w-5 h-5" />
                   </div>
                   <div>
@@ -501,7 +501,7 @@ export default function PropertyDetailPage() {
                 </div>
 
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-[#ff5a3c]/10 text-[#ff5a3c] flex items-center justify-center">
                     <Layers className="w-5 h-5" />
                   </div>
                   <div>
@@ -513,7 +513,7 @@ export default function PropertyDetailPage() {
                 </div>
 
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-[#0b1528]/10 text-[#0b1528] flex items-center justify-center">
                     <Building className="w-5 h-5" />
                   </div>
                   <div>
@@ -525,7 +525,7 @@ export default function PropertyDetailPage() {
                 </div>
 
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-[#0b1528]/10 text-[#0b1528] flex items-center justify-center">
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
                   <div>
@@ -537,7 +537,7 @@ export default function PropertyDetailPage() {
                 </div>
 
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-[#0b1528]/10 text-[#0b1528] flex items-center justify-center">
                     <Calendar className="w-5 h-5" />
                   </div>
                   <div>
@@ -549,7 +549,7 @@ export default function PropertyDetailPage() {
                 </div>
 
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-[#0b1528]/10 text-[#0b1528] flex items-center justify-center">
                     <Eye className="w-5 h-5" />
                   </div>
                   <div>
@@ -580,7 +580,7 @@ export default function PropertyDetailPage() {
                       key={idx}
                       className="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-semibold text-slate-800"
                     >
-                      <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                      <div className="w-6 h-6 rounded-lg bg-[#84cc16]/20 text-[#65a30d] flex items-center justify-center flex-shrink-0">
                         <Check className="w-3.5 h-3.5" />
                       </div>
                       <span>{amenity}</span>
@@ -703,7 +703,7 @@ export default function PropertyDetailPage() {
                         value={reviewForm.comment}
                         onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
                         placeholder="Describe your tour, locality advantages, building maintenance, or agent support..."
-                        className="w-full text-xs rounded-xl border border-slate-200 bg-white p-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500"
+                        className="w-full text-xs rounded-xl border border-slate-200 bg-white p-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#ff5a3c]/20 focus:border-[#ff5a3c]"
                         required
                       />
                     </div>
@@ -714,6 +714,7 @@ export default function PropertyDetailPage() {
                         variant="primary"
                         size="sm"
                         loading={submittingReview}
+                        className="!rounded-xl shadow-md shadow-[#ff5a3c]/20 font-bold"
                       >
                         Submit Review
                       </Button>
@@ -724,6 +725,7 @@ export default function PropertyDetailPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => navigate('/login')}
+                    className="!rounded-xl font-bold"
                   >
                     Sign In to Write a Review
                   </Button>
@@ -750,7 +752,7 @@ export default function PropertyDetailPage() {
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
+                          <div className="w-8 h-8 rounded-full bg-[#0b1528] text-white flex items-center justify-center font-bold text-xs">
                             {rev.user?.avatar ? (
                               <img src={rev.user.avatar} alt="" className="w-full h-full object-cover rounded-full" />
                             ) : (
@@ -803,11 +805,11 @@ export default function PropertyDetailPage() {
           <div className="lg:col-span-1 space-y-6 sticky top-28">
             <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
               <div className="flex items-center gap-4 mb-5 pb-5 border-b border-slate-100">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-700 text-white flex items-center justify-center text-xl font-bold flex-shrink-0 shadow-sm">
+                <div className="w-14 h-14 rounded-2xl bg-[#0b1528] text-white flex items-center justify-center text-xl font-bold flex-shrink-0 shadow-sm">
                   {agentContact?.name?.charAt(0)?.toUpperCase() || 'A'}
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider block">
+                  <span className="text-[10px] uppercase font-bold text-[#ff5a3c] tracking-wider block">
                     Verified Agent / Owner
                   </span>
                   <h3 className="text-base font-bold text-slate-900 leading-snug">
@@ -823,13 +825,13 @@ export default function PropertyDetailPage() {
               <div className="space-y-3 mb-6 text-xs text-slate-700">
                 {agentContact?.phone && (
                   <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50">
-                    <Phone className="w-4 h-4 text-emerald-600" />
+                    <Phone className="w-4 h-4 text-[#ff5a3c]" />
                     <span className="font-semibold">{agentContact.phone}</span>
                   </div>
                 )}
                 {agentContact?.email && (
                   <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50">
-                    <Mail className="w-4 h-4 text-emerald-600" />
+                    <Mail className="w-4 h-4 text-[#ff5a3c]" />
                     <span className="truncate">{agentContact.email}</span>
                   </div>
                 )}
@@ -842,7 +844,7 @@ export default function PropertyDetailPage() {
                   variant="primary"
                   size="md"
                   icon={Send}
-                  className="w-full"
+                  className="w-full !rounded-2xl shadow-lg shadow-[#ff5a3c]/30 font-bold"
                 >
                   Send Inquiry / Book Visit
                 </Button>
@@ -850,7 +852,7 @@ export default function PropertyDetailPage() {
                 {agentContact?._id && (
                   <Link
                     to={`/agents/${agentContact._id}`}
-                    className="block w-full text-center py-2.5 text-xs font-bold text-slate-700 hover:text-emerald-700 rounded-xl border border-slate-200 hover:bg-slate-50 transition"
+                    className="block w-full text-center py-2.5 text-xs font-bold text-slate-700 hover:text-[#ff5a3c] rounded-2xl border border-slate-200 hover:bg-slate-50 transition"
                   >
                     View Agent Profile
                   </Link>
@@ -859,12 +861,12 @@ export default function PropertyDetailPage() {
             </div>
 
             {/* Trust Assurance Card */}
-            <div className="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200/60 text-xs text-emerald-900 space-y-2">
-              <div className="flex items-center gap-2 font-bold text-emerald-800">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <div className="p-5 rounded-2xl bg-[#0b1528] text-white border border-white/10 text-xs space-y-2">
+              <div className="flex items-center gap-2 font-bold text-[#84cc16]">
+                <ShieldCheck className="w-4 h-4" />
                 <span>Buyer Protection Guarantee</span>
               </div>
-              <p className="text-[11px] text-emerald-700 leading-relaxed">
+              <p className="text-[11px] text-slate-300 leading-relaxed">
                 Direct transparent negotiations, zero advance fees, and guaranteed property verification by EstateCraft legal consultants.
               </p>
             </div>
@@ -876,14 +878,14 @@ export default function PropertyDetailPage() {
           <div className="mt-20 pt-12 border-t border-slate-200">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 block mb-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#ff5a3c] block mb-1">
                   Recommendations
                 </span>
                 <h2 className="text-2xl font-bold text-slate-900">Similar Properties in {property.city}</h2>
               </div>
               <Link
                 to={`/properties?city=${property.city}`}
-                className="text-xs font-bold text-emerald-700 hover:underline"
+                className="text-xs font-bold text-[#ff5a3c] hover:underline"
               >
                 View More in {property.city} &rarr;
               </Link>

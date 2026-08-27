@@ -1,31 +1,157 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #ff5a3c;
+  --color-primary-hover: #e04b30;
+  --color-primary-dark: #c4381f;
+  
+  --color-navy-950: #060c16;
+  --color-navy-900: #0b1528;
+  --color-navy-850: #0f1c34;
+  --color-navy-800: #152542;
+  --color-navy-700: #1e3357;
+
+  /* Theme mappings to ensure all components inherit the coral orange brand styling */
+  --color-emerald-50: #fff5f3;
+  --color-emerald-100: #ffe8e4;
+  --color-emerald-200: #ffd5cc;
+  --color-emerald-300: #ffb1a1;
+  --color-emerald-400: #ff7d63;
+  --color-emerald-500: #ff5a3c;
+  --color-emerald-600: #ff5a3c;
+  --color-emerald-700: #e04b30;
+  --color-emerald-800: #ba3b24;
+  --color-emerald-900: #993320;
+  --color-emerald-950: #54170b;
+}
+
 @layer base {
   :root {
-    --primary: #059669;
-    --primary-hover: #047857;
-    --secondary: #0f172a;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --primary: #ff5a3c;
+    --primary-hover: #e04b30;
+    --primary-dark: #c4381f;
+    --navy-950: #08101e;
+    --navy-900: #0b1528;
+    --navy-850: #0f1c34;
+    --navy-800: #152542;
+    --navy-700: #1e3357;
     --surface: #ffffff;
     --surface-muted: #f8fafc;
     --border: #e2e8f0;
   }
 
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-slate-50 text-slate-900 antialiased min-h-screen font-sans;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-family: var(--font-sans);
+    background-color: #0b1528;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 }
 
+/* Lenis Smooth Scrolling Styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Glassmorphism Styles */
 .glassmorphism {
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border: 1px solid rgba(226, 232, 240, 0.85);
 }
 
 .dark-glassmorphism {
-  background: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(11, 21, 40, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
+
+.hero-search-glass {
+  background: rgba(15, 28, 52, 0.78);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #08101e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e3357;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff5a3c;
+}
+
+/* Rotating Text Animation for Play Video */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+/* Soft transition utilities */
+.transition-smooth {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scroll Fade-In & Pop Animations */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
