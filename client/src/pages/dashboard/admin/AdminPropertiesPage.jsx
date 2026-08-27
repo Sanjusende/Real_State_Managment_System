@@ -11,6 +11,8 @@ import {
   Eye,
   Clock,
   Filter,
+  PlusCircle,
+  Edit,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import DashboardLayout from '../../../components/dashboard/DashboardLayout';
@@ -183,6 +185,12 @@ export default function AdminPropertiesPage() {
             <option value="RENTED">RENTED</option>
             <option value="INACTIVE">INACTIVE</option>
           </select>
+
+          <Link to="/agent/properties/create">
+            <Button variant="primary" size="sm" icon={PlusCircle}>
+              Add Property
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -292,12 +300,20 @@ export default function AdminPropertiesPage() {
                         {p.slug && (
                           <Link
                             to={`/properties/${p.slug}`}
-                            className="p-1.5 text-slate-400 hover:text-emerald-700 rounded-lg transition"
+                            className="p-1.5 text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition"
                             title="Open Public Page"
                           >
                             <ExternalLink className="w-4 h-4" />
                           </Link>
                         )}
+
+                        <Link
+                          to={`/agent/properties/${p._id}/edit`}
+                          className="p-1.5 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition"
+                          title="Edit Property"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Link>
 
                         {p.approvalStatus !== 'APPROVED' && (
                           <button

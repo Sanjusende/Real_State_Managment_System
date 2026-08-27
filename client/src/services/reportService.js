@@ -5,16 +5,13 @@ import api from './api';
  */
 
 export const submitReport = async (data) => {
-  const response = await api.post('/reports', data);
-  return response.data;
+  return await api.post('/reports', data);
 };
 
 export const getMyReports = async (params = {}) => {
-  const response = await api.get('/reports/my', { params });
-  return response.data;
+  return await api.get('/reports/my', { params });
 };
 
 export const updateReportStatus = async (id, data) => {
-  const response = await api.patch(`/reports/${id}/status`, data);
-  return response.data;
+  return await api.patch(`/reports/${id}/status`, data);
 };

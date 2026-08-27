@@ -8,12 +8,11 @@ import {
   User,
   LogOut,
   ChevronDown,
-  ShieldCheck,
-  Search,
+  ExternalLink,
+  PlusCircle,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import DashboardSidebar from './DashboardSidebar';
-import clsx from 'clsx';
 
 export default function DashboardLayout({ children, title, subtitle }) {
   const { user, logout } = useAuth();
@@ -24,93 +23,112 @@ export default function DashboardLayout({ children, title, subtitle }) {
   const role = user?.role || 'USER';
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans">
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-40 bg-white border-b border-slate-200/90 shadow-xs px-4 sm:px-6 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-2xs px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
         {/* Left: Mobile Toggle & Brand */}
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-            className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+            className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
           >
             {mobileSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-sm shadow-emerald-600/30">
-              <Building2 className="w-5 h-5" />
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-xl bg-[#ff5a3c] flex items-center justify-center text-white shadow-md shadow-[#ff5a3c]/30 group-hover:scale-105 transition-transform">
+              <Building2 className="w-4.5 h-4.5" />
             </div>
-            <span className="text-lg font-extrabold tracking-tight text-slate-900 hidden sm:inline">
-              Estate<span className="text-emerald-600">Craft</span>
-            </span>
+            <div className="flex flex-col text-left">
+              <span className="text-lg font-black tracking-tight text-slate-950">
+                Estate<span className="text-[#ff5a3c]">Craft</span>
+              </span>
+              <span className="text-[8px] font-extrabold uppercase tracking-widest text-slate-400 -mt-1 hidden sm:inline">
+                Premium Real Estate
+              </span>
+            </div>
           </Link>
 
-          <div className="hidden md:flex items-center ml-4 pl-4 border-l border-slate-200">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 text-slate-700">
+          <div className="hidden md:flex items-center ml-3 pl-3 border-l border-slate-200">
+            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-slate-100 text-slate-700">
               {role} Workspace
             </span>
           </div>
         </div>
 
-        {/* Right: Notifications & User Profile */}
+        {/* Right: Quick Marketplace, Notifications & Profile */}
         <div className="flex items-center gap-3">
           <Link
-            to="/dashboard/notifications"
-            className="p-2 rounded-xl text-slate-500 hover:text-emerald-700 hover:bg-slate-100 transition relative"
-            title="Notifications"
+            to="/properties"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:text-[#ff5a3c] hover:bg-slate-100 text-xs font-bold transition"
           >
-            <Bell className="w-5 h-5" />
-            <span className="w-2 h-2 rounded-full bg-emerald-500 absolute top-2 right-2 ring-2 ring-white"></span>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+            <span>Public Catalog</span>
           </Link>
 
-          {/* User Profile Menu */}
+          <Link
+            to="/dashboard/notifications"
+            className="p-2.5 rounded-xl text-slate-500 hover:text-slate-950 hover:bg-slate-100 transition relative border border-slate-200/80 bg-white"
+            title="Notifications"
+          >
+            <Bell className="w-4 h-4" />
+            <span className="w-2 h-2 rounded-full bg-[#ff5a3c] absolute top-2 right-2 ring-2 ring-white"></span>
+          </Link>
+
+          {/* User Profile Dropdown */}
           <div className="relative">
             <button
               type="button"
               onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-              className="flex items-center gap-2.5 p-1.5 pl-2.5 rounded-2xl border border-slate-200 hover:border-slate-300 bg-white transition cursor-pointer"
+              className="flex items-center gap-2.5 p-1 pl-2 rounded-2xl border border-slate-200/90 hover:border-slate-300 bg-white transition cursor-pointer shadow-2xs"
             >
-              <div className="w-7 h-7 rounded-xl bg-emerald-700 text-white flex items-center justify-center text-xs font-bold shadow-xs">
-                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+              <div className="w-8 h-8 rounded-xl bg-[#0b1528] text-white flex items-center justify-center text-xs font-extrabold shadow-xs overflow-hidden flex-shrink-0">
+                {user?.avatar ? (
+                  <img src={user.avatar} alt={user?.name} className="w-full h-full object-cover" />
+                ) : (
+                  user?.name?.charAt(0)?.toUpperCase() || 'U'
+                )}
               </div>
               <div className="text-left hidden sm:block">
                 <span className="block text-xs font-bold text-slate-900 leading-tight">
                   {user?.name || 'User'}
                 </span>
-                <span className="block text-[10px] text-slate-400 font-semibold">{user?.email}</span>
+                <span className="block text-[9px] text-slate-400 font-bold uppercase">{user?.role}</span>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400 pr-1" />
             </button>
 
             {/* Dropdown Menu */}
             {userDropdownOpen && (
               <div
                 onMouseLeave={() => setUserDropdownOpen(false)}
-                className="absolute right-0 mt-2 w-52 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 text-xs animate-in fade-in zoom-in-95"
+                className="absolute right-0 mt-2 w-52 bg-white border border-slate-200 rounded-2xl shadow-xl py-2 z-50 text-xs animate-in fade-in"
               >
                 <div className="px-4 py-2 border-b border-slate-100 mb-1">
-                  <span className="block font-bold text-slate-900">{user?.name}</span>
-                  <span className="block text-[10px] text-emerald-700 font-semibold uppercase">{user?.role}</span>
+                  <span className="block font-bold text-slate-900 truncate">{user?.name}</span>
+                  <span className="block text-[10px] text-[#ff5a3c] font-bold uppercase">{user?.role}</span>
                 </div>
 
                 <Link
                   to={role === 'AGENT' ? '/agent/profile' : role === 'SELLER' ? '/seller/profile' : '/dashboard/profile'}
                   onClick={() => setUserDropdownOpen(false)}
-                  className="flex items-center gap-2.5 px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-emerald-700 font-semibold"
+                  className="flex items-center gap-2.5 px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-slate-950 font-semibold"
                 >
                   <User className="w-4 h-4 text-slate-400" />
-                  <span>View Profile</span>
+                  <span>My Profile</span>
                 </Link>
 
-                <Link
-                  to="/properties"
-                  onClick={() => setUserDropdownOpen(false)}
-                  className="flex items-center gap-2.5 px-4 py-2 text-slate-700 hover:bg-slate-50 hover:text-emerald-700 font-semibold"
-                >
-                  <Search className="w-4 h-4 text-slate-400" />
-                  <span>Public Catalog</span>
-                </Link>
+                {(role === 'AGENT' || role === 'SELLER' || role === 'ADMIN') && (
+                  <Link
+                    to={role === 'SELLER' ? '/seller/properties/create' : '/agent/properties/create'}
+                    onClick={() => setUserDropdownOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2 text-slate-700 hover:bg-[#ff5a3c]/10 hover:text-[#ff5a3c] font-bold"
+                  >
+                    <PlusCircle className="w-4 h-4 text-[#ff5a3c]" />
+                    <span>Post New Property</span>
+                  </Link>
+                )}
 
                 <div className="border-t border-slate-100 my-1"></div>
 
@@ -121,7 +139,7 @@ export default function DashboardLayout({ children, title, subtitle }) {
                     logout();
                     navigate('/login');
                   }}
-                  className="w-full text-left flex items-center gap-2.5 px-4 py-2 text-red-600 hover:bg-red-50 font-semibold cursor-pointer"
+                  className="w-full text-left flex items-center gap-2.5 px-4 py-2 text-rose-600 hover:bg-rose-50 font-bold cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Sign Out</span>
@@ -153,12 +171,12 @@ export default function DashboardLayout({ children, title, subtitle }) {
         )}
 
         {/* Content Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
           {/* Header Title Section if provided */}
           {(title || subtitle) && (
             <div className="mb-8">
               {title && (
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
                   {title}
                 </h1>
               )}
@@ -173,3 +191,4 @@ export default function DashboardLayout({ children, title, subtitle }) {
     </div>
   );
 }
+

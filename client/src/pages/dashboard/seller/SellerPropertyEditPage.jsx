@@ -42,6 +42,7 @@ export default function SellerPropertyEditPage() {
     address: '',
     city: '',
     state: '',
+    pincode: '',
   });
 
   useEffect(() => {
@@ -63,6 +64,7 @@ export default function SellerPropertyEditPage() {
             address: p.address || '',
             city: p.city || '',
             state: p.state || '',
+            pincode: p.pincode || '',
           });
 
           if (p.images && p.images.length > 0) {
@@ -211,7 +213,7 @@ export default function SellerPropertyEditPage() {
             required
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <FormInput
               label="City"
               name="city"
@@ -223,6 +225,13 @@ export default function SellerPropertyEditPage() {
               label="State"
               name="state"
               value={form.state}
+              onChange={handleChange}
+              required
+            />
+            <FormInput
+              label="Pincode"
+              name="pincode"
+              value={form.pincode}
               onChange={handleChange}
               required
             />

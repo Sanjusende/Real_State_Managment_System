@@ -120,8 +120,13 @@ export default function AgentPropertyCreatePage() {
     try {
       const thumbnailImg = images.find((img) => img.isThumbnail) || images[0];
 
+      const autoDescription = form.description?.trim().length >= 10
+        ? form.description.trim()
+        : `Prime ${form.bedrooms || '2'} BHK ${form.propertyType} available for ${form.listingType === 'RENT' ? 'rent' : 'sale'} in ${form.city}, ${form.state}. Features modern architecture, verified title, and prime connectivity.`;
+
       const payload = {
         ...form,
+        description: autoDescription,
         price: Number(form.price),
         area: Number(form.area),
         bedrooms: Number(form.bedrooms) || 0,

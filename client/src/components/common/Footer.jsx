@@ -5,22 +5,20 @@ import {
   Mail,
   Phone,
   MapPin,
-  ArrowRight,
   ShieldCheck,
   Award,
   Clock,
-  Heart,
 } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-900 text-slate-300 border-t border-slate-800">
+    <footer className="bg-[#08101e] text-slate-300 border-t border-white/10">
       {/* Top Value Highlights */}
-      <div className="border-b border-slate-800/80">
+      <div className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-[#ff5a3c]/10 text-[#ff5a3c] border border-[#ff5a3c]/20 flex items-center justify-center flex-shrink-0">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
@@ -32,7 +30,7 @@ export default function Footer() {
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-[#ff5a3c]/10 text-[#ff5a3c] border border-[#ff5a3c]/20 flex items-center justify-center flex-shrink-0">
                 <Award className="w-6 h-6" />
               </div>
               <div>
@@ -44,7 +42,7 @@ export default function Footer() {
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-[#ff5a3c]/10 text-[#ff5a3c] border border-[#ff5a3c]/20 flex items-center justify-center flex-shrink-0">
                 <Clock className="w-6 h-6" />
               </div>
               <div>
@@ -64,12 +62,12 @@ export default function Footer() {
           {/* Brand & Mission */}
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md shadow-emerald-600/30">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#ff5a3c] to-[#ff7b5a] flex items-center justify-center text-white shadow-md shadow-[#ff5a3c]/30">
                 <Building2 className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
-                  Estate<span className="text-emerald-400">Craft</span>
+                <span className="text-xl font-extrabold tracking-tight text-white flex items-center gap-0.5">
+                  Estate<span className="text-[#ff5a3c]">Craft</span>
                 </span>
                 <span className="block text-[10px] font-semibold uppercase tracking-widest text-slate-400 -mt-1">
                   Premium Real Estate
@@ -78,20 +76,20 @@ export default function Footer() {
             </Link>
 
             <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-              EstateCraft is India's next-generation property marketplace providing curated luxury apartments, duplex villas, commercial hubs, and verified residential plots across high-growth corridors.
+              EstateCraft is your premium property marketplace providing curated luxury apartments, duplex villas, corporate workspaces, and verified plots across high-growth corridors.
             </p>
 
             <div className="space-y-2 text-xs text-slate-400 pt-2">
               <div className="flex items-center gap-2.5">
-                <MapPin className="w-4 h-4 text-emerald-400" />
+                <MapPin className="w-4 h-4 text-[#ff5a3c]" />
                 <span>Sector 62, Commercial Corridor, Bhopal, MP 462016</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-emerald-400" />
+                <Phone className="w-4 h-4 text-[#ff5a3c]" />
                 <span>+91 98765 43210 / +91 755 240011</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-emerald-400" />
+                <Mail className="w-4 h-4 text-[#ff5a3c]" />
                 <span>support@estatecraft.com</span>
               </div>
             </div>
@@ -104,27 +102,27 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2.5 text-xs text-slate-400">
               <li>
-                <Link to="/properties" className="hover:text-emerald-400 transition">
+                <Link to="/properties" className="hover:text-[#ff5a3c] transition">
                   All Properties
                 </Link>
               </li>
               <li>
-                <Link to="/properties?listingType=SALE" className="hover:text-emerald-400 transition">
+                <Link to="/properties?listingType=SALE" className="hover:text-[#ff5a3c] transition">
                   Properties for Sale
                 </Link>
               </li>
               <li>
-                <Link to="/properties?listingType=RENT" className="hover:text-emerald-400 transition">
+                <Link to="/properties?listingType=RENT" className="hover:text-[#ff5a3c] transition">
                   Rental Properties
                 </Link>
               </li>
               <li>
-                <Link to="/properties?propertyType=COMMERCIAL" className="hover:text-emerald-400 transition">
+                <Link to="/properties?propertyType=COMMERCIAL" className="hover:text-[#ff5a3c] transition">
                   Commercial & Offices
                 </Link>
               </li>
               <li>
-                <Link to="/agents" className="hover:text-emerald-400 transition">
+                <Link to="/agents" className="hover:text-[#ff5a3c] transition">
                   Verified Agents
                 </Link>
               </li>
@@ -136,30 +134,50 @@ export default function Footer() {
             <h4 className="text-white text-xs font-bold uppercase tracking-wider mb-4">
               Top Locations
             </h4>
-            <ul className="space-y-2.5 text-xs text-slate-400">
+            <ul className="space-y-2 text-xs text-slate-400">
               <li>
-                <Link to="/properties?city=Bhopal" className="hover:text-emerald-400 transition">
+                <Link to="/properties?city=Bhopal" className="hover:text-[#ff5a3c] transition">
                   Properties in Bhopal
                 </Link>
               </li>
               <li>
-                <Link to="/properties?city=Indore" className="hover:text-emerald-400 transition">
+                <Link to="/properties?city=Indore" className="hover:text-[#ff5a3c] transition">
                   Properties in Indore
                 </Link>
               </li>
               <li>
-                <Link to="/properties?city=Mumbai" className="hover:text-emerald-400 transition">
+                <Link to="/properties?city=Jabalpur" className="hover:text-[#ff5a3c] transition">
+                  Properties in Jabalpur
+                </Link>
+              </li>
+              <li>
+                <Link to="/properties?city=Balaghat" className="hover:text-[#ff5a3c] transition">
+                  Properties in Balaghat
+                </Link>
+              </li>
+              <li>
+                <Link to="/properties?city=Ujjain" className="hover:text-[#ff5a3c] transition">
+                  Properties in Ujjain
+                </Link>
+              </li>
+              <li>
+                <Link to="/properties?city=Mumbai" className="hover:text-[#ff5a3c] transition">
                   Properties in Mumbai
                 </Link>
               </li>
               <li>
-                <Link to="/properties?city=Pune" className="hover:text-emerald-400 transition">
-                  Properties in Pune
+                <Link to="/properties?city=California" className="hover:text-[#ff5a3c] transition">
+                  Properties in California
                 </Link>
               </li>
               <li>
-                <Link to="/properties?city=Bengaluru" className="hover:text-emerald-400 transition">
-                  Properties in Bengaluru
+                <Link to="/properties?city=Florida" className="hover:text-[#ff5a3c] transition">
+                  Properties in Florida
+                </Link>
+              </li>
+              <li>
+                <Link to="/properties?city=New York" className="hover:text-[#ff5a3c] transition">
+                  Properties in New York
                 </Link>
               </li>
             </ul>
@@ -172,22 +190,22 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2.5 text-xs text-slate-400">
               <li>
-                <Link to="/about" className="hover:text-emerald-400 transition">
+                <Link to="/about" className="hover:text-[#ff5a3c] transition">
                   About EstateCraft
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="hover:text-emerald-400 transition">
+                <Link to="/contact" className="hover:text-[#ff5a3c] transition">
                   Contact Support
                 </Link>
               </li>
               <li>
-                <Link to="/register?role=AGENT" className="hover:text-emerald-400 transition">
+                <Link to="/register?role=AGENT" className="hover:text-[#ff5a3c] transition">
                   Become an Agent Partner
                 </Link>
               </li>
               <li>
-                <Link to="/login" className="hover:text-emerald-400 transition">
+                <Link to="/login" className="hover:text-[#ff5a3c] transition">
                   Client Portal
                 </Link>
               </li>
@@ -197,16 +215,17 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-slate-800 bg-slate-950 py-6 text-center text-xs text-slate-500">
+      <div className="border-t border-white/10 bg-[#060c16] py-6 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>
             &copy; {new Date().getFullYear()} EstateCraft Technologies Inc. All rights reserved.
           </p>
-          <p className="flex items-center gap-1 text-[11px]">
-            Crafted for premium real estate experiences across India.
+          <p className="flex items-center gap-1 text-[11px] text-slate-400">
+            Crafted for premium real estate experiences.
           </p>
         </div>
       </div>
     </footer>
   );
 }
+

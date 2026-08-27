@@ -443,14 +443,19 @@ function AppContent() {
   );
 }
 
+import SmoothScroll from './components/common/SmoothScroll';
+
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <FavoritesProvider>
-          <AppContent />
-        </FavoritesProvider>
-      </AuthProvider>
+      <SmoothScroll>
+        <AuthProvider>
+          <FavoritesProvider>
+            <AppContent />
+          </FavoritesProvider>
+        </AuthProvider>
+      </SmoothScroll>
     </BrowserRouter>
   );
 }
+

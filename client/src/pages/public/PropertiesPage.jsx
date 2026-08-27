@@ -9,6 +9,8 @@ import {
   Sparkles,
   ChevronDown,
   X,
+  Layers,
+  Building2,
 } from 'lucide-react';
 import PropertyCard from '../../components/property/PropertyCard';
 import FilterPanel from '../../components/search/FilterPanel';
@@ -159,36 +161,76 @@ export default function PropertiesPage() {
   if (filters.amenities) activeTags.push({ key: 'amenities', label: `Amenities: ${filters.amenities}` });
   if (filters.isFeatured) activeTags.push({ key: 'isFeatured', label: `Featured Only` });
 
-  return (
-    <div className="min-h-screen bg-slate-50 py-8 md:py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
-            Properties for Sale & Rent
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-2xl">
-            Browse our comprehensive database of verified residential homes, luxury duplexes, commercial offices, and clear-title plots.
-          </p>
-        </div>
+  const CATEGORIES = [
+    { label: 'All Listings', value: '' },
+    { label: 'Villas & Houses', value: 'VILLA' },
+    { label: 'Apartments', value: 'APARTMENT' },
+    { label: 'Commercial', value: 'COMMERCIAL' },
+    { label: 'Plots & Land', value: 'PLOT' },
+    { label: 'Penthouse', value: 'PENTHOUSE' },
+  ];
 
+  return (
+    <div className="min-h-screen bg-[#f8fafc] pb-24">
+      {/* Top Luxury Dark Hero Header */}
+      <div className="bg-[#0b1528] pt-32 pb-20 border-b border-white/10 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(255,90,60,0.2),rgba(255,255,255,0))] pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#ff5a3c]/15 text-[#ff5a3c] border border-[#ff5a3c]/30 text-xs font-extrabold uppercase tracking-wider mb-4 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Certified Real Estate Portfolio</span>
+            </div>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+              Explore Available <span className="text-[#ff5a3c]">Properties</span>
+            </h1>
+            <p className="text-xs sm:text-base text-slate-300 max-w-2xl font-normal leading-relaxed">
+              Browse curated luxury apartments, duplex villas, corporate workspaces, and verified residential plots across prime growth corridors.
+            </p>
+          </div>
+
+          {/* Category Filter Pills in Hero */}
+          <div className="flex flex-wrap gap-2 mt-8">
+            {CATEGORIES.map((cat) => {
+              const isSelected = (filters.propertyType || '') === cat.value;
+              return (
+                <button
+                  key={cat.label}
+                  type="button"
+                  onClick={() => handleFilterChange({ propertyType: cat.value })}
+                  className={clsx(
+                    'px-4 py-2 rounded-full text-xs font-extrabold transition cursor-pointer border',
+                    isSelected
+                      ? 'bg-[#ff5a3c] text-white border-[#ff5a3c] shadow-lg shadow-[#ff5a3c]/30'
+                      : 'bg-white/10 text-slate-200 border-white/10 hover:bg-white/20 hover:text-white'
+                  )}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
         {/* Top Control Bar (Search, Count, Layout, Sort, Mobile Filter Button) */}
-        <div className="bg-white rounded-2xl border border-slate-200/90 p-4 mb-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-white rounded-3xl border border-slate-200/90 p-4 mb-6 shadow-md shadow-slate-900/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Left: Quick Search Input & Count */}
           <div className="flex flex-1 items-center gap-3">
             <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-emerald-600 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-4 h-4 text-[#ff5a3c] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={filters.keyword || ''}
                 onChange={(e) => handleFilterChange({ keyword: e.target.value })}
-                placeholder="Search by city, title, or address..."
-                className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500 transition"
+                placeholder="Search city, locality, project name..."
+                className="w-full pl-10 pr-4 py-2.5 text-xs font-semibold rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#ff5a3c]/20 focus:border-[#ff5a3c] transition text-slate-900"
               />
             </div>
 
-            <div className="hidden sm:block text-xs font-semibold text-slate-500 whitespace-nowrap">
-              <span className="text-slate-900 font-bold">{pagination.total}</span> listings found
+            <div className="hidden sm:block text-xs font-bold text-slate-500 whitespace-nowrap">
+              <span className="text-slate-950 font-extrabold">{pagination.total}</span> properties found
             </div>
           </div>
 
@@ -198,19 +240,19 @@ export default function PropertiesPage() {
             <button
               type="button"
               onClick={() => setMobileFilterOpen(true)}
-              className="lg:hidden inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-800 transition cursor-pointer"
+              className="lg:hidden inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-900 transition cursor-pointer"
             >
-              <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-600" />
+              <SlidersHorizontal className="w-3.5 h-3.5 text-[#ff5a3c]" />
               <span>Filters {activeTags.length > 0 && `(${activeTags.length})`}</span>
             </button>
 
             {/* Sorting Select */}
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-slate-500 hidden sm:inline">Sort:</span>
+              <span className="text-xs font-bold text-slate-400 hidden sm:inline">Sort:</span>
               <select
                 value={filters.sort || 'newest'}
                 onChange={(e) => handleFilterChange({ sort: e.target.value })}
-                className="text-xs font-semibold text-slate-800 rounded-xl border border-slate-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-100 focus:border-emerald-500 cursor-pointer"
+                className="text-xs font-bold text-slate-900 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#ff5a3c]/20 focus:border-[#ff5a3c] cursor-pointer"
               >
                 {SORT_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -226,9 +268,9 @@ export default function PropertiesPage() {
                 type="button"
                 onClick={() => setLayout('grid')}
                 className={clsx(
-                  'p-1.5 rounded-lg transition cursor-pointer',
+                  'p-2 rounded-lg transition cursor-pointer',
                   layout === 'grid'
-                    ? 'bg-white text-emerald-700 shadow-xs'
+                    ? 'bg-[#0b1528] text-white shadow-xs'
                     : 'text-slate-400 hover:text-slate-700'
                 )}
                 title="Grid View"
@@ -239,9 +281,9 @@ export default function PropertiesPage() {
                 type="button"
                 onClick={() => setLayout('list')}
                 className={clsx(
-                  'p-1.5 rounded-lg transition cursor-pointer',
+                  'p-2 rounded-lg transition cursor-pointer',
                   layout === 'list'
-                    ? 'bg-white text-emerald-700 shadow-xs'
+                    ? 'bg-[#0b1528] text-white shadow-xs'
                     : 'text-slate-400 hover:text-slate-700'
                 )}
                 title="List View"
@@ -254,18 +296,18 @@ export default function PropertiesPage() {
 
         {/* Active Filter Pills Bar */}
         {activeTags.length > 0 && (
-          <div className="flex flex-wrap items-center gap-2 mb-6 p-3 bg-white rounded-2xl border border-slate-200">
-            <span className="text-xs font-bold text-slate-700 mr-1">Active Filters:</span>
+          <div className="flex flex-wrap items-center gap-2 mb-6 p-3.5 bg-white rounded-2xl border border-slate-200/90 shadow-xs">
+            <span className="text-xs font-extrabold text-slate-700 mr-1">Active:</span>
             {activeTags.map((tag) => (
               <span
                 key={tag.key}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200/80"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#ff5a3c]/10 text-slate-900 border border-[#ff5a3c]/20"
               >
                 <span>{tag.label}</span>
                 <button
                   type="button"
                   onClick={() => removeFilterTag(tag.key)}
-                  className="hover:text-red-600 transition cursor-pointer"
+                  className="hover:text-[#ff5a3c] transition cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -274,7 +316,7 @@ export default function PropertiesPage() {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="text-xs font-semibold text-slate-500 hover:text-red-600 underline ml-auto transition cursor-pointer"
+              className="text-xs font-bold text-slate-500 hover:text-[#ff5a3c] underline ml-auto transition cursor-pointer"
             >
               Clear All
             </button>
@@ -336,7 +378,7 @@ export default function PropertiesPage() {
       <Modal
         isOpen={mobileFilterOpen}
         onClose={() => setMobileFilterOpen(false)}
-        title="Search & Filter Listings"
+        title="Refine Properties"
         maxWidth="max-w-xl"
       >
         <FilterPanel
@@ -353,12 +395,13 @@ export default function PropertiesPage() {
             onClick={() => setMobileFilterOpen(false)}
             variant="primary"
             size="md"
-            className="w-full"
+            className="w-full !rounded-xl font-bold"
           >
-            Apply Filters ({pagination.total} Found)
+            Show {pagination.total} Properties
           </Button>
         </div>
       </Modal>
     </div>
   );
 }
+

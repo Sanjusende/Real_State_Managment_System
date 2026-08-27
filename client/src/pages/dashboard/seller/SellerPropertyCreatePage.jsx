@@ -58,8 +58,13 @@ export default function SellerPropertyCreatePage() {
     try {
       const thumbnailImg = images.find((img) => img.isThumbnail) || images[0];
 
+      const autoDescription = form.description?.trim().length >= 10
+        ? form.description.trim()
+        : `${form.title} available for ${form.listingType === 'RENT' ? 'rent' : 'sale'} in ${form.city || 'prime locality'}. Well maintained and ready for possession.`;
+
       const payload = {
         ...form,
+        description: autoDescription,
         price: Number(form.price),
         area: Number(form.area),
         bedrooms: Number(form.bedrooms) || 0,

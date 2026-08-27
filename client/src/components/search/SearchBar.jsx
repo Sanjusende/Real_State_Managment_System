@@ -4,62 +4,66 @@ import {
   Search,
   MapPin,
   Home,
-  IndianRupee,
-  SlidersHorizontal,
   ChevronDown,
+  SlidersHorizontal,
+  ArrowRight,
+  Building,
 } from 'lucide-react';
-import Button from '../common/Button';
 import clsx from 'clsx';
 
-const CITIES = ['Bhopal', 'Indore', 'Mumbai', 'Pune', 'Bengaluru', 'Delhi'];
-const PROPERTY_TYPES = [
-  { value: '', label: 'All Property Types' },
-  { value: 'APARTMENT', label: 'Apartment / Flat' },
-  { value: 'VILLA', label: 'Luxury Villa' },
-  { value: 'HOUSE', label: 'Independent House' },
-  { value: 'COMMERCIAL', label: 'Commercial Space' },
-  { value: 'OFFICE', label: 'Corporate Office' },
-  { value: 'PLOT', label: 'Residential Plot' },
-  { value: 'PENTHOUSE', label: 'Penthouse' },
-  { value: 'STUDIO', label: 'Studio Apartment' },
+const CITIES = [
+  'Bhopal',
+  'Indore',
+  'Jabalpur',
+  'Balaghat',
+  'Ujjain',
+  'Mumbai',
+  'California',
+  'Florida',
+  'New York',
+  'Pune',
+  'Bengaluru',
+  'Delhi',
 ];
 
-const PRICE_RANGES = [
-  { label: 'Any Price Range', min: '', max: '' },
-  { label: 'Under ₹ 30 Lakh', min: '', max: '3000000' },
-  { label: '₹ 30 L - ₹ 60 L', min: '3000000', max: '6000000' },
-  { label: '₹ 60 L - ₹ 1.5 Cr', min: '6000000', max: '15000000' },
-  { label: '₹ 1.5 Cr - ₹ 3 Cr', min: '15000000', max: '30000000' },
-  { label: 'Above ₹ 3 Cr', min: '30000000', max: '' },
+const CATEGORY_OPTIONS = [
+  { value: '', label: 'Select Category' },
+  { value: 'APARTMENT', label: 'Apartment' },
+  { value: 'VILLA', label: 'Villa' },
+  { value: 'COMMERCIAL', label: 'Commercial' },
+  { value: 'OFFICE', label: 'Office' },
+  { value: 'PLOT', label: 'Residential Plot' },
+  { value: 'PENTHOUSE', label: 'Penthouse' },
+  { value: 'STUDIO', label: 'Studio' },
 ];
 
 export default function SearchBar({
   initialValues = {},
   onSearch,
   showTabs = true,
+  showQuickPills = true,
   className = '',
 }) {
   const navigate = useNavigate();
-  const [listingType, setListingType] = useState(initialValues.listingType || 'SALE');
+  const [activeTab, setActiveTab] = useState(initialValues.propertyType || 'VILLA');
   const [keyword, setKeyword] = useState(initialValues.keyword || '');
+  const [category, setCategory] = useState(initialValues.propertyType || '');
   const [city, setCity] = useState(initialValues.city || '');
-  const [propertyType, setPropertyType] = useState(initialValues.propertyType || '');
-  const [priceIndex, setPriceIndex] = useState(0);
+  const [listingType, setListingType] = useState(initialValues.listingType || 'SALE');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e?.preventDefault();
 
-    const selectedRange = PRICE_RANGES[priceIndex];
+    const selectedType = category || (activeTab !== 'GENERAL' ? activeTab : undefined);
+
     const params = {
       keyword: keyword.trim() || undefined,
       city: city || undefined,
-      propertyType: propertyType || undefined,
+      propertyType: selectedType || undefined,
       listingType: listingType || undefined,
-      minPrice: selectedRange?.min || undefined,
-      maxPrice: selectedRange?.max || undefined,
     };
 
-    // Remove undefined
     const cleanQuery = Object.entries(params).reduce((acc, [k, v]) => {
       if (v) acc[k] = v;
       return acc;
@@ -73,119 +77,211 @@ export default function SearchBar({
     }
   };
 
+  const handleTabClick = (tabKey) => {
+    setActiveTab(tabKey);
+    if (tabKey === 'GENERAL') {
+      setCategory('');
+    } else {
+      setCategory(tabKey);
+    }
+  };
+
+  const handleQuickPill = (typeKey, listingKey = 'SALE') => {
+    navigate(`/properties?propertyType=${typeKey}&listingType=${listingKey}`);
+  };
+
   return (
-    <div
-      className={clsx(
-        'w-full max-w-4xl mx-auto rounded-3xl bg-white p-3 md:p-4 shadow-2xl shadow-slate-900/10 border border-slate-100',
-        className
-      )}
-    >
-      {/* Search Tabs: Buy, Rent, Commercial */}
-      {showTabs && (
-        <div className="flex items-center gap-2 mb-3 px-2">
+    <div className={clsx('w-full max-w-4xl mx-auto', className)}>
+      {/* Search Container Card */}
+      <div className="hero-search-glass rounded-3xl p-4 sm:p-6 shadow-2xl shadow-black/40 text-white">
+        {/* Top Category Tabs matching reference: General | Villa | Apartment | Commercial */}
+        {showTabs && (
+          <div className="flex items-center gap-2 mb-4 overflow-x-auto no-scrollbar">
+            {[
+              { label: 'General', key: 'GENERAL' },
+              { label: 'Villa', key: 'VILLA' },
+              { label: 'Apartment', key: 'APARTMENT' },
+              { label: 'Commercial', key: 'COMMERCIAL' },
+            ].map((tab) => {
+              const isActive = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => handleTabClick(tab.key)}
+                  className={clsx(
+                    'px-4 sm:px-5 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer flex-shrink-0',
+                    isActive
+                      ? 'bg-[#ff5a3c] text-white shadow-md shadow-[#ff5a3c]/30'
+                      : 'bg-white/10 text-slate-300 hover:bg-white/15 hover:text-white'
+                  )}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Main Search Inputs in 1 Row */}
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
+            {/* 1. Keyword / Looking For */}
+            <div className="lg:col-span-4 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 focus-within:border-[#ff5a3c] focus-within:bg-white/10 transition">
+              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-0.5">
+                Keyword
+              </label>
+              <input
+                type="text"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                placeholder="Looking For?"
+                className="w-full bg-transparent text-white placeholder-slate-400 text-xs sm:text-sm font-semibold focus:outline-none"
+              />
+            </div>
+
+            {/* 2. Select Category Dropdown */}
+            <div className="relative lg:col-span-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 focus-within:border-[#ff5a3c] focus-within:bg-white/10 transition">
+              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-0.5">
+                Category
+              </label>
+              <div className="flex items-center justify-between">
+                <select
+                  value={category}
+                  onChange={(e) => {
+                    setCategory(e.target.value);
+                    if (e.target.value) setActiveTab(e.target.value);
+                  }}
+                  className="w-full bg-transparent text-white text-xs sm:text-sm font-semibold focus:outline-none appearance-none cursor-pointer"
+                >
+                  {CATEGORY_OPTIONS.map((c) => (
+                    <option key={c.value} value={c.value} className="bg-[#0f1c34] text-white">
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 pointer-events-none absolute right-3.5 bottom-3" />
+              </div>
+            </div>
+
+            {/* 3. Location Dropdown / Input */}
+            <div className="relative lg:col-span-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 focus-within:border-[#ff5a3c] focus-within:bg-white/10 transition">
+              <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-0.5">
+                Location
+              </label>
+              <div className="flex items-center justify-between">
+                <select
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full bg-transparent text-white text-xs sm:text-sm font-semibold focus:outline-none appearance-none cursor-pointer"
+                >
+                  <option value="" className="bg-[#0f1c34] text-white">
+                    Select Location
+                  </option>
+                  {CITIES.map((c) => (
+                    <option key={c} value={c} className="bg-[#0f1c34] text-white">
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 pointer-events-none absolute right-3.5 bottom-3" />
+              </div>
+            </div>
+
+            {/* 4. Action Buttons (More + Search) */}
+            <div className="lg:col-span-2 flex items-center gap-2">
+              {/* More Filter Toggle */}
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                title="More Filters"
+                className={clsx(
+                  'p-3.5 rounded-2xl border transition cursor-pointer flex items-center justify-center flex-shrink-0',
+                  showAdvanced
+                    ? 'bg-[#ff5a3c]/20 border-[#ff5a3c] text-[#ff5a3c]'
+                    : 'bg-white/5 border-white/10 hover:bg-white/10 text-slate-300'
+                )}
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+              </button>
+
+              {/* High-contrast Coral Orange Search Button */}
+              <button
+                type="submit"
+                className="flex-1 py-3.5 px-4 rounded-2xl bg-[#ff5a3c] hover:bg-[#e04b30] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-lg shadow-[#ff5a3c]/30 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
+              >
+                <Search className="w-4 h-4" />
+                <span>Search</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Advanced Filter drawer */}
+          {showAdvanced && (
+            <div className="mt-4 pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-3 animate-fade-in text-xs">
+              <div>
+                <label className="block text-slate-400 font-semibold mb-1">Listing Type</label>
+                <div className="flex gap-2">
+                  {['SALE', 'RENT', 'LEASE'].map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setListingType(type)}
+                      className={clsx(
+                        'px-3 py-1.5 rounded-xl font-bold flex-1 transition',
+                        listingType === type
+                          ? 'bg-[#ff5a3c] text-white'
+                          : 'bg-white/5 text-slate-300 hover:bg-white/10'
+                      )}
+                    >
+                      {type === 'SALE' ? 'Buy' : type === 'RENT' ? 'Rent' : 'Lease'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </form>
+      </div>
+
+      {/* Quick Pills below Search Box matching reference: Commercial ->, Villa ->, Sales -> */}
+      {showQuickPills && (
+        <div className="flex items-center gap-3 mt-4 justify-start sm:justify-center overflow-x-auto no-scrollbar py-1">
           <button
             type="button"
-            onClick={() => setListingType('SALE')}
-            className={clsx(
-              'px-4 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer',
-              listingType === 'SALE'
-                ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            )}
+            onClick={() => handleQuickPill('COMMERCIAL')}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs font-semibold backdrop-blur-md transition cursor-pointer flex-shrink-0"
           >
-            Buy Property
+            <span>Commercial</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
           </button>
           <button
             type="button"
-            onClick={() => setListingType('RENT')}
-            className={clsx(
-              'px-4 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer',
-              listingType === 'RENT'
-                ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            )}
+            onClick={() => handleQuickPill('VILLA')}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs font-semibold backdrop-blur-md transition cursor-pointer flex-shrink-0"
           >
-            Rent Flat / Villa
+            <span>Villa</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
           </button>
           <button
             type="button"
-            onClick={() => setListingType('LEASE')}
-            className={clsx(
-              'px-4 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer',
-              listingType === 'LEASE'
-                ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/30'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            )}
+            onClick={() => handleQuickPill('APARTMENT', 'SALE')}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs font-semibold backdrop-blur-md transition cursor-pointer flex-shrink-0"
           >
-            Commercial Lease
+            <span>Sales</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickPill('APARTMENT', 'RENT')}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs font-semibold backdrop-blur-md transition cursor-pointer flex-shrink-0"
+          >
+            <span>Rentals</span>
+            <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
           </button>
         </div>
       )}
-
-      {/* Main Search Inputs Grid */}
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 items-center">
-          {/* Keyword / Location Search */}
-          <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200/80 focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition">
-            <Search className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-            <input
-              type="text"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              placeholder="Search address, project, or title..."
-              className="w-full text-xs md:text-sm bg-transparent text-slate-800 placeholder-slate-400 focus:outline-none"
-            />
-          </div>
-
-          {/* City Selection */}
-          <div className="relative flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200/80 focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition">
-            <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-            <select
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full text-xs md:text-sm bg-transparent text-slate-800 focus:outline-none appearance-none cursor-pointer"
-            >
-              <option value="">All Cities</option>
-              {CITIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 pointer-events-none absolute right-3" />
-          </div>
-
-          {/* Property Type Selection */}
-          <div className="relative flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200/80 focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-100 transition">
-            <Home className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-            <select
-              value={propertyType}
-              onChange={(e) => setPropertyType(e.target.value)}
-              className="w-full text-xs md:text-sm bg-transparent text-slate-800 focus:outline-none appearance-none cursor-pointer"
-            >
-              {PROPERTY_TYPES.map((pt) => (
-                <option key={pt.value} value={pt.value}>
-                  {pt.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 text-slate-400 pointer-events-none absolute right-3" />
-          </div>
-
-          {/* Submit Search Button */}
-          <div>
-            <Button
-              type="submit"
-              variant="primary"
-              size="md"
-              icon={Search}
-              className="w-full !rounded-2xl !py-3 font-bold"
-            >
-              Search Properties
-            </Button>
-          </div>
-        </div>
-      </form>
     </div>
   );
 }
+
