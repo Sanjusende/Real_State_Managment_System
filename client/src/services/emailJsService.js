@@ -11,15 +11,25 @@ export const sendEmailViaEmailJS = async (data) => {
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
   const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-  if (!serviceId || !templateId || !publicKey) {
+  const cleanServiceId = (serviceId || '').trim();
+  const cleanTemplateId = (templateId || '').trim();
+  const cleanPublicKey = (publicKey || '').trim();
+
+  if (!cleanServiceId || !cleanTemplateId || !cleanPublicKey) {
     console.log('[EmailJS] VITE_EMAILJS_SERVICE_ID, TEMPLATE_ID or PUBLIC_KEY not configured. Skipping EmailJS dispatch.');
     return { success: false, skipped: true, reason: 'EmailJS credentials not set' };
   }
 
   const templateParams = {
+    name: data.name,
     from_name: data.name,
+    user_name: data.name,
+    email: data.email,
     from_email: data.email,
+    user_email: data.email,
+    reply_to: data.email,
     phone: data.phone,
+    user_phone: data.phone,
     subject: data.subject,
     message: data.message,
     to_name: 'EstateCraft Admin',
@@ -27,7 +37,9 @@ export const sendEmailViaEmailJS = async (data) => {
   };
 
   try {
-    const result = await emailjs.send(serviceId, templateId, templateParams, publicKey);
+    const result = await emailjs.send(cleanServiceId, cleanTemplateId, templateParams, {
+      publicKey: cleanPublicKey,
+    });
     console.log('[EmailJS] Email sent successfully:', result.status, result.text);
     return { success: true, text: result.text };
   } catch (error) {

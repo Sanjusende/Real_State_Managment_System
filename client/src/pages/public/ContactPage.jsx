@@ -70,11 +70,11 @@ export default function ContactPage() {
     if (!form.phone || !phoneRegex.test(form.phone.trim())) {
       newErrors.phone = 'Please provide a valid phone number with country code.';
     }
-    if (!form.subject || form.subject.trim().length < 3) {
-      newErrors.subject = 'Subject must be at least 3 characters.';
+    if (!form.subject || form.subject.trim().length === 0) {
+      newErrors.subject = 'Please provide a subject.';
     }
-    if (!form.message || form.message.trim().length < 10) {
-      newErrors.message = 'Message must be at least 10 characters.';
+    if (!form.message || form.message.trim().length < 2) {
+      newErrors.message = 'Please provide a message with at least 2 characters.';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -114,14 +114,13 @@ export default function ContactPage() {
       // 1. Save to MongoDB Database
       await submitContact(payload);
 
-      // 2. Dispatch Email via EmailJS (Frontend browser email service)
-      sendEmailViaEmailJS(payload).catch((err) => {
-        console.warn('[Contact EmailJS] Error:', err);
-      });
-      
-      // 3. Open WhatsApp directly to admin with the message
-      const whatsappUrl = getFormattedWhatsAppUrl(payload);
-      window.open(whatsappUrl, '_blank');
+      // 2. Dispatch Email via EmailJS
+      const emailResult = await sendEmailViaEmailJS(payload);
+      if (emailResult.skipped) {
+        console.warn('[EmailJS] Keys not configured in client/.env, skipping EmailJS email.');
+      } else if (!emailResult.success) {
+        console.warn('[EmailJS] Dispatch failed:', emailResult.error);
+      }
 
       toast.success('Your message has been sent successfully!');
       setForm({ name: '', email: '', phone: '', subject: '', message: '', website: '' });

@@ -455,7 +455,7 @@ export const getPropertyBySlug = async (slug, user = null) => {
  */
 export const getMyProperties = async (user, queryParams = {}) => {
   const page = Math.max(1, parseInt(queryParams.page || 1, 10));
-  const limit = Math.min(50, Math.max(1, parseInt(queryParams.limit || 10, 10)));
+  const limit = Math.min(100, Math.max(1, parseInt(queryParams.limit || 50, 10)));
   const skip = (page - 1) * limit;
 
   const userId = user.id || user._id;
@@ -463,8 +463,27 @@ export const getMyProperties = async (user, queryParams = {}) => {
     $or: [{ owner: userId }, { agent: userId }],
   };
 
-  if (queryParams.status) filter.status = queryParams.status.toUpperCase();
-  if (queryParams.approvalStatus) filter.approvalStatus = queryParams.approvalStatus.toUpperCase();
+  if (queryParams.status && queryParams.status.toUpperCase() !== 'ALL') {
+    filter.status = queryParams.status.toUpperCase();
+  }
+  if (queryParams.approvalStatus && queryParams.approvalStatus.toUpperCase() !== 'ALL') {
+    filter.approvalStatus = queryParams.approvalStatus.toUpperCase();
+  }
+
+  const searchQuery = queryParams.search || queryParams.keyword || queryParams.q;
+  if (searchQuery && typeof searchQuery === 'string' && searchQuery.trim().length > 0) {
+    const term = escapeRegex(searchQuery.trim());
+    filter.$and = filter.$and || [];
+    filter.$and.push({
+      $or: [
+        { title: { $regex: term, $options: 'i' } },
+        { city: { $regex: term, $options: 'i' } },
+        { state: { $regex: term, $options: 'i' } },
+        { address: { $regex: term, $options: 'i' } },
+        { pincode: { $regex: term, $options: 'i' } },
+      ],
+    });
+  }
 
   const [properties, total] = await Promise.all([
     Property.find(filter)
