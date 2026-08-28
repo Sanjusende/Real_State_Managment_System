@@ -1,8 +1,14 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+const defaultBaseUrl =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD
+    ? 'https://real-state-managment-systemser.onrender.com/api/v1'
+    : 'http://localhost:5000/api/v1');
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1',
+  baseURL: defaultBaseUrl,
   timeout: 25000,
   headers: {
     'Content-Type': 'application/json',
