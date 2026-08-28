@@ -6,6 +6,7 @@ export const globalLimiter = rateLimit({
   max: ENV.RATE_LIMIT.MAX_REQUESTS,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: {
     success: false,
     statusCode: 429,
@@ -18,6 +19,7 @@ export const authLimiter = rateLimit({
   max: ENV.RATE_LIMIT.AUTH_MAX_REQUESTS,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: {
     success: false,
     statusCode: 429,
@@ -30,6 +32,7 @@ export const contactLimiter = rateLimit({
   max: ENV.RATE_LIMIT.CONTACT_MAX_REQUESTS || 5,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: {
     success: false,
     statusCode: 429,
@@ -38,3 +41,4 @@ export const contactLimiter = rateLimit({
 });
 
 export default globalLimiter;
+

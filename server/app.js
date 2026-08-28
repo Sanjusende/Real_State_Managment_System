@@ -15,6 +15,11 @@ import masterRouter from './routes/index.js';
 const app = express();
 
 /* =========================================================
+   TRUST PROXY CONFIGURATION (Required for Render, Vercel, Cloudflare)
+========================================================= */
+app.set('trust proxy', 1);
+
+/* =========================================================
    SECURITY HEADERS
 ========================================================= */
 
@@ -25,27 +30,49 @@ app.use(helmet());
    CORS CONFIGURATION
 ========================================================= */
 
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests without an origin
-      // Example: Postman, curl, mobile applications
+      // Allow requests without an origin (Postman, mobile, server-to-server)
       if (!origin) {
         return callback(null, true);
       }
 
-      // Allow configured frontend URL
+      // Allow configured frontend client URL
       if (origin === ENV.CLIENT_URL) {
         return callback(null, true);
       }
 
-      // Allow localhost during development
-      if (origin.startsWith('http://localhost:')) {
+      // Allow production Vercel frontend and preview deployments
+      if (
+        origin === 'https://real-state-managment-system.vercel.app' ||
+        origin.endsWith('.vercel.app') ||
+        origin.includes('vercel.app')
+      ) {
+        return callback(null, true);
+      }
+
+      // Allow Render server itself
+      if (
+        origin === 'https://real-state-managment-systemser.onrender.com' ||
+        origin === 'https://real-state-managment-system.onrender.com' ||
+        origin.endsWith('.onrender.com')
+      ) {
+        return callback(null, true);
+      }
+
+      // Allow localhost and 127.0.0.1 during local testing
+      if (
+        origin.startsWith('http://localhost:') ||
+        origin.startsWith('http://127.0.0.1:') ||
+        origin.startsWith('https://localhost:')
+      ) {
         return callback(null, true);
       }
 
       return callback(
-        new Error('CORS policy: Access denied for this origin.')
+        new Error(`CORS policy: Access denied for origin ${origin}`)
       );
     },
 
@@ -59,6 +86,7 @@ app.use(
       'DELETE',
       'OPTIONS',
     ],
+
 
     allowedHeaders: [
       'Content-Type',
@@ -117,6 +145,8 @@ app.use(sanitizeNoSql);
 ========================================================= */
 
 app.get('/', (req, res) => {
+  console.log('🔥 ROOT ROUTE HIT');
+
   res.status(200).json({
     success: true,
     statusCode: 200,
