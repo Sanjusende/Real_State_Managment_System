@@ -3,11 +3,12 @@ import toast from 'react-hot-toast';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1',
-  timeout: 15000,
+  timeout: 25000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
 
 // Request Interceptor: Attach JWT Bearer Token if present
 api.interceptors.request.use(
