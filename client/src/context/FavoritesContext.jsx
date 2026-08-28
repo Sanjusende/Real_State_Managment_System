@@ -7,7 +7,9 @@ export const FavoritesProvider = ({ children }) => {
   const [favorites, setFavorites] = useState(() => {
     try {
       const stored = localStorage.getItem('estate_favorites');
-      return stored ? JSON.parse(stored) : [];
+      if (!stored) return [];
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
@@ -22,24 +24,48 @@ export const FavoritesProvider = ({ children }) => {
   }, [favorites]);
 
   const isFavorite = (propertyId) => {
-    return favorites.includes(propertyId);
+    if (!propertyId || !Array.isArray(favorites)) return false;
+    return favorites.some((item) =>
+      typeof item === 'string' ? item === propertyId : item?._id === propertyId
+    );
   };
 
   const toggleFavorite = (property) => {
+    if (!property) return;
     const id = typeof property === 'string' ? property : property._id;
-    const title = typeof property === 'object' ? property.title : 'Property';
+    const title = typeof property === 'object' ? property.title || 'Property' : 'Property';
 
-    if (favorites.includes(id)) {
-      setFavorites((prev) => prev.filter((item) => item !== id));
-      toast.success(`Removed from saved properties`);
+    if (isFavorite(id)) {
+      setFavorites((prev) =>
+        prev.filter((item) => (typeof item === 'string' ? item !== id : item?._id !== id))
+      );
+      toast.success('Removed from saved properties');
     } else {
-      setFavorites((prev) => [...prev, id]);
-      toast.success(`Saved "${title.length > 25 ? title.substring(0, 25) + '...' : title}" to favorites!`);
+      const itemToSave = typeof property === 'object' ? property : { _id: id, title };
+      setFavorites((prev) => [...prev, itemToSave]);
+      toast.success(
+        `Saved "${title.length > 25 ? title.substring(0, 25) + '...' : title}" to favorites!`
+      );
     }
   };
 
+  const clearFavorites = () => {
+    setFavorites([]);
+    toast.success('Cleared all saved properties');
+  };
+
+  const favoritesCount = Array.isArray(favorites) ? favorites.length : 0;
+
   return (
-    <FavoritesContext.Provider value={{ favorites, isFavorite, toggleFavorite }}>
+    <FavoritesContext.Provider
+      value={{
+        favorites,
+        favoritesCount,
+        isFavorite,
+        toggleFavorite,
+        clearFavorites,
+      }}
+    >
       {children}
     </FavoritesContext.Provider>
   );

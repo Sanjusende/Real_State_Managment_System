@@ -35,15 +35,24 @@ export default function DashboardSidebar({ onCloseMobile }) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let isMounted = true;
     if (user) {
       getUnreadCount()
         .then((res) => {
-          if (res?.data?.unreadCount !== undefined) {
+          if (!isMounted) return;
+          if (typeof res?.data?.unreadCount === 'number') {
             setUnreadNotifs(res.data.unreadCount);
+          } else if (typeof res?.unreadCount === 'number') {
+            setUnreadNotifs(res.unreadCount);
           }
         })
-        .catch(() => {});
+        .catch(() => {
+          if (isMounted) setUnreadNotifs(0);
+        });
     }
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   const role = user?.role || 'USER';
@@ -94,6 +103,11 @@ export default function DashboardSidebar({ onCloseMobile }) {
 
   const navItems = navConfig[role] || navConfig.USER;
 
+  const userInitial =
+    typeof user?.name === 'string' && user.name.trim().length > 0
+      ? user.name.trim().charAt(0).toUpperCase()
+      : 'U';
+
   return (
     <aside className="w-64 xl:w-72 bg-white border-r border-slate-200/90 flex flex-col justify-between h-full min-h-[calc(100vh-4.25rem)]">
       <div>
@@ -104,7 +118,7 @@ export default function DashboardSidebar({ onCloseMobile }) {
               {user?.avatar ? (
                 <img src={user.avatar} alt="" className="w-full h-full rounded-2xl object-cover" />
               ) : (
-                user?.name?.charAt(0)?.toUpperCase() || 'U'
+                userInitial
               )}
             </div>
             <div className="overflow-hidden">
@@ -146,7 +160,7 @@ export default function DashboardSidebar({ onCloseMobile }) {
                   <span>{item.label}</span>
                 </div>
 
-                {item.badge !== undefined && item.badge !== null && item.badge > 0 && (
+                {item.badge !== undefined && item.badge !== null && Number(item.badge) > 0 && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-[#ff5a3c] text-white shadow-xs">
                     {item.badge}
                   </span>

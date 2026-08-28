@@ -244,7 +244,7 @@ export default function AboutPage() {
               </Button>
             </Link>
             <Link to="/contact">
-              <Button variant="outline" size="lg" className="!rounded-2xl !border-white/20 !text-white hover:!bg-white/10 font-bold text-sm">
+              <Button variant="outline" size="lg" className="  !rounded-2xl !border-white/20 hover:!text-white  hover:!bg-white/10 font-bold text-sm">
                 Speak with an Advisor
               </Button>
             </Link>
