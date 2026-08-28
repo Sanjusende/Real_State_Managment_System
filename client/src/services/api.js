@@ -1,14 +1,20 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const defaultBaseUrl =
-  import.meta.env.VITE_API_BASE_URL ||
-  (import.meta.env.PROD
+let baseUrl = import.meta.env.VITE_API_BASE_URL;
+
+// Automatically correct any legacy/stale Render URL from old env configs
+if (
+  !baseUrl ||
+  baseUrl.includes('real-state-managment-system.onrender.com')
+) {
+  baseUrl = import.meta.env.PROD
     ? 'https://real-state-managment-systemser.onrender.com/api/v1'
-    : 'http://localhost:5000/api/v1');
+    : 'http://localhost:5000/api/v1';
+}
 
 const api = axios.create({
-  baseURL: defaultBaseUrl,
+  baseURL: baseUrl,
   timeout: 25000,
   headers: {
     'Content-Type': 'application/json',
